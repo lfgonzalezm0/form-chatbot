@@ -15,7 +15,7 @@ async function getConsultaData(guid: string): Promise<ConsultaData | null> {
     const result = await pool.query(
       `
       SELECT pregunta, contexto, enlace
-      FROM consultanecesidad
+      FROM "consultaNecesidad"
       WHERE guid = $1
       LIMIT 1
       `,
