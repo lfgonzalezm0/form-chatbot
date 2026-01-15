@@ -9,16 +9,20 @@ interface ConsultaData {
 }
 
 async function getConsultaData(guid: string): Promise<ConsultaData | null> {
+  console.log("Buscando GUID:", guid);
+
   try {
     const result = await pool.query(
       `
       SELECT pregunta, contexto, enlace
-      FROM public."consultaNecesidad"
+      FROM consultanecesidad
       WHERE guid = $1
       LIMIT 1
       `,
       [guid]
     );
+
+    console.log("Resultado de la consulta:", result.rows.length, "registros encontrados");
 
     if (result.rows.length === 0) {
       return null;
