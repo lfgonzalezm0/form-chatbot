@@ -335,14 +335,89 @@ body {
   height: 20px;
 }
 
+/* Botones del header del sidebar */
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.close-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #54656f;
+}
+
+/* Boton hamburguesa para movil */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #075e54;
+  color: white;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.mobile-menu-btn:hover {
+  background-color: #064e46;
+  transform: scale(1.05);
+}
+
+.mobile-menu-btn:active {
+  transform: scale(0.95);
+}
+
+.mobile-menu-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Overlay para cerrar sidebar */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
   .sidebar {
-    width: 100%;
-    min-width: 100%;
+    width: 85%;
+    max-width: 350px;
+    min-width: auto;
     position: fixed;
+    left: 0;
+    top: 0;
     z-index: 100;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
@@ -350,6 +425,18 @@ body {
 
   .sidebar.open {
     transform: translateX(0);
+  }
+
+  .close-btn {
+    display: flex;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
   }
 
   .main-content {

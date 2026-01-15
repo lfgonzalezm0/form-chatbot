@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+interface SidebarProps {
+  onClose?: () => void;
+}
+
 interface Conversacion {
   guid: string;
   telefonocliente: string;
@@ -65,7 +69,7 @@ function getEstadoIcon(estado: string) {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: SidebarProps) {
   const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [filtro, setFiltro] = useState<"todos" | "pendiente" | "completado">("todos");
@@ -101,16 +105,29 @@ export default function Sidebar() {
     completado: conversaciones.filter((c) => c.estado === "completado").length,
   };
 
+  const handleConversacionClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
-    <div className="sidebar">
+    <>
       {/* Header del sidebar */}
       <div className="sidebar-header">
         <h2>Conversaciones</h2>
-        <button className="refresh-btn" onClick={fetchConversaciones} title="Actualizar">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-          </svg>
-        </button>
+        <div className="sidebar-header-actions">
+          <button className="refresh-btn" onClick={fetchConversaciones} title="Actualizar">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+          </button>
+          {onClose && (
+            <button className="close-btn" onClick={onClose} title="Cerrar">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filtros */}
@@ -155,6 +172,7 @@ export default function Sidebar() {
               key={conv.guid}
               href={`/?guid=${conv.guid}`}
               className={`conversacion-item ${guidActual === conv.guid ? "active" : ""} ${conv.estado}`}
+              onClick={handleConversacionClick}
             >
               {/* Avatar con inicial del telefono */}
               <div className="conv-avatar">
@@ -186,6 +204,6 @@ export default function Sidebar() {
           ))
         )}
       </div>
-    </div>
+    </>
   );
 }
