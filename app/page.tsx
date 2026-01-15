@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import pool from "@/lib/db";
+import FormularioRespuesta from "./components/FormularioRespuesta";
 
 interface ConsultaData {
   pregunta: string;
@@ -112,27 +113,7 @@ export default async function Page({
           </div>
 
           {/* Formulario de respuesta */}
-          <form action={data.enlace} method="GET">
-            <input type="hidden" name="guid" value={guid} />
-
-            <div className="bubble-user">
-              <textarea
-                name="respuesta"
-                required
-                className="chat-textarea"
-                placeholder="Escribe tu respuesta..."
-                rows={3}
-              />
-            </div>
-
-            <div className="chat-actions">
-              <button type="submit" className="chat-send" title="Enviar">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                </svg>
-              </button>
-            </div>
-          </form>
+          <FormularioRespuesta guid={guid} enlace={data.enlace} />
         </div>
       </div>
     </div>
