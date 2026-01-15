@@ -72,11 +72,17 @@ function getEstadoIcon(estado: string) {
 export default function Sidebar({ onClose }: SidebarProps) {
   const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
   const [cargando, setCargando] = useState(true);
-  const [filtro, setFiltro] = useState<"todos" | "pendiente" | "completado">("todos");
   const [busqueda, setBusqueda] = useState("");
   const searchParams = useSearchParams();
   const guidActual = searchParams.get("guid");
-
+const filtroParam = searchParams.get("filtro") as
+  | "todos"
+  | "pendiente"
+  | "cerrado"
+  | null;
+const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">(
+  filtroParam || "todos"
+);
   useEffect(() => {
     fetchConversaciones();
   }, []);
@@ -116,7 +122,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const contadores = {
     todos: conversaciones.length,
     pendiente: conversaciones.filter((c) => c.estado === "pendiente").length,
-    completado: conversaciones.filter((c) => c.estado === "completado").length,
+    cerrado: conversaciones.filter((c) => c.estado === "cerrado").length,
   };
 
   const handleConversacionClick = () => {
@@ -159,10 +165,10 @@ export default function Sidebar({ onClose }: SidebarProps) {
           Pendientes ({contadores.pendiente})
         </button>
         <button
-          className={`filtro-btn ${filtro === "completado" ? "active" : ""}`}
-          onClick={() => setFiltro("completado")}
+          className={`filtro-btn ${filtro === "cerrado" ? "active" : ""}`}
+          onClick={() => setFiltro("cerrado")}
         >
-          Completados ({contadores.completado})
+          Completados ({contadores.cerrado})
         </button>
       </div>
 
@@ -184,7 +190,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           conversacionesFiltradas.map((conv) => (
             <a
               key={conv.guid}
-              href={`/?guid=${conv.guid}`}
+              href={`/?guid=${conv.guid}&filtro=${filtro}`}
               className={`conversacion-item ${guidActual === conv.guid ? "active" : ""} ${conv.estado}`}
               onClick={handleConversacionClick}
             >

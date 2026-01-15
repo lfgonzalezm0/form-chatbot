@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     await pool.query(
       `
       UPDATE consultanecesidad
-      SET estado = 'completado', respuesta = $2
+      SET estado = 'cerrado', respuesta = $2
       WHERE guid = $1
       `,
       [guid, accion === "responder" ? respuesta : accion]
