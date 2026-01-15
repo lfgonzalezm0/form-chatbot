@@ -12,6 +12,8 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  console.log("DATABASE_URL:", process.env.DATABASE_URL);
+
   const result = await pool.query(
     `
     SELECT pregunta, contexto
