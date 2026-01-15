@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import pool from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { enlace, respuesta, guid } = body;
 
-    if (!enlace || !respuesta) {
+    if (!enlace || !respuesta || !guid) {
       return NextResponse.json(
         { error: "Faltan datos requeridos" },
         { status: 400 }
@@ -31,6 +32,18 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Actualizar el estado a "completado" en la base de datos
+    await pool.query(
+      `
+      UPDATE consultanecesidad
+      SET estado = 'completado', respuesta = $2
+      WHERE guid = $1
+      `,
+      [guid, respuesta]
+    );
+
+    console.log("Estado actualizado a completado para GUID:", guid);
 
     return NextResponse.json({ success: true });
   } catch (error) {

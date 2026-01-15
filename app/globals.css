@@ -219,6 +219,33 @@ body::before {
   transform: scale(0.95);
 }
 
+/* Icono de enlace ya usado */
+.enlace-usado-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.enlace-usado-icon svg {
+  width: 48px;
+  height: 48px;
+  color: #075e54;
+}
+
+/* Animacion de spin para loading */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .chat-container {

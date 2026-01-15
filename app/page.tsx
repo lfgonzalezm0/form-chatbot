@@ -7,6 +7,7 @@ interface ConsultaData {
   pregunta: string;
   contexto: string;
   enlace: string;
+  estado: string;
 }
 
 async function getConsultaData(guid: string): Promise<ConsultaData | null> {
@@ -15,7 +16,7 @@ async function getConsultaData(guid: string): Promise<ConsultaData | null> {
   try {
     const result = await pool.query(
       `
-      SELECT pregunta, contexto, enlace
+      SELECT pregunta, contexto, enlace, estado
       FROM consultanecesidad
       WHERE guid = $1
       LIMIT 1
@@ -70,6 +71,48 @@ export default async function Page({
             <p className="bubble-context text-center mt-2">
               No se encontro informacion para este enlace.
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Verificar si el enlace ya fue usado
+  if (data.estado !== "pendiente") {
+    return (
+      <div className="min-h-screen flex flex-col">
+        {/* Header estilo WhatsApp */}
+        <div className="wa-header">
+          <div className="wa-header-avatar">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            </svg>
+          </div>
+          <div className="wa-header-info">
+            <span className="wa-header-name">Asistente</span>
+            <span className="wa-header-status">en linea</span>
+          </div>
+        </div>
+
+        {/* Chat area */}
+        <div className="wa-chat-area">
+          <div className="chat-container">
+            {/* Mensaje de enlace ya usado */}
+            <div className="bubble-bot">
+              <div className="enlace-usado-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <p className="bubble-title text-center">Este enlace ya fue utilizado</p>
+              <p className="bubble-context text-center mt-2">
+                Ya se ha enviado una respuesta para esta consulta.
+                Si necesitas realizar otra consulta, solicita un nuevo enlace.
+              </p>
+              <span className="bubble-time">
+                {new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
         </div>
       </div>
