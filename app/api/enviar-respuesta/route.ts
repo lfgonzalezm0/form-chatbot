@@ -4,14 +4,29 @@ import pool from "@/lib/db";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { enlace, respuesta, guid } = body;
+    const { enlace, accion, respuesta, guid } = body;
 
-    if (!enlace || !respuesta || !guid) {
+    if (!enlace || !accion || !guid) {
       return NextResponse.json(
         { error: "Faltan datos requeridos" },
         { status: 400 }
       );
     }
+
+    // Validar que si la accion es responder, tenga respuesta
+    if (accion === "responder" && !respuesta) {
+      return NextResponse.json(
+        { error: "Se requiere una respuesta" },
+        { status: 400 }
+      );
+    }
+
+    // Preparar payload para n8n
+    const n8nPayload = {
+      guid,
+      accion,
+      respuesta: accion === "responder" ? respuesta : null,
+    };
 
     // Hacer POST al webhook de n8n
     const response = await fetch(enlace, {
@@ -19,10 +34,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        guid,
-        respuesta,
-      }),
+      body: JSON.stringify(n8nPayload),
     });
 
     if (!response.ok) {
@@ -33,17 +45,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Actualizar el estado a "completado" en la base de datos
+    // Actualizar el estado y la respuesta en la base de datos
     await pool.query(
       `
       UPDATE consultanecesidad
       SET estado = 'completado', respuesta = $2
       WHERE guid = $1
       `,
-      [guid, respuesta]
+      [guid, accion === "responder" ? respuesta : accion]
     );
 
-    console.log("Estado actualizado a completado para GUID:", guid);
+    console.log("Estado actualizado para GUID:", guid, "- Accion:", accion);
 
     return NextResponse.json({ success: true });
   } catch (error) {
