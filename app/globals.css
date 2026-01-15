@@ -1,0 +1,98 @@
+/* Fondo general tipo WhatsApp */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #e5ddd5; /* color base WhatsApp */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Opcional: patrón sutil tipo WhatsApp (sin imagen) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.35) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.2;
+  pointer-events: none;
+}/* Contenedor general (chat) */
+.chat-container {
+  max-width: 420px;
+  margin: 40px auto;
+  background-color: #e5ddd5;
+  padding: 16px;
+  border-radius: 8px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Burbuja del bot / sistema */
+.bubble-bot {
+  background-color: #ffffff;
+  color: #111;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  max-width: 85%;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+/* Título (pregunta) */
+.bubble-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* Contexto */
+.bubble-context {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.4;
+}
+
+/* Burbuja del usuario (input) */
+.bubble-user {
+  background-color: #dcf8c6;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+/* Textarea */
+.chat-textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  resize: none;
+  outline: none;
+  font-size: 14px;
+  font-family: inherit;
+  min-height: 60px;
+}
+
+/* Barra inferior */
+.chat-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* Botón enviar */
+.chat-send {
+  background-color: #25d366;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.chat-send:hover {
+  background-color: #1ebe5d;
+}
