@@ -49,7 +49,7 @@ function getPasoColor(paso: string | null): string {
   if (!paso) return "#999";
   const pasoLower = paso.toLowerCase();
   if (pasoLower.includes("necesidad")) return "#075e54";
-  if (pasoLower.includes("accion")) return "#fb8c00";
+  if (pasoLower.includes("acción")) return "#fb8c00";
   if (pasoLower.includes("proceso")) return "#1976d2";
   if (pasoLower.includes("cierre")) return "#43a047";
   return "#666";
@@ -117,7 +117,7 @@ export default function Sidebar({
     // Filtro por seccion (paso)
     const pasoLower = (c.paso || "").toLowerCase();
     if (seccionActiva === "Necesidad" && !pasoLower.includes("necesidad")) return false;
-    if (seccionActiva === "Acción" && !pasoLower.includes("accion")) return false;
+    if (seccionActiva === "Acción" && !pasoLower.includes("acción")) return false;
 
     // Filtro por estado
     if (filtro !== "todos" && c.estado !== filtro) return false;
@@ -140,7 +140,7 @@ export default function Sidebar({
   const conversacionesSeccion = conversaciones.filter((c) => {
     const pasoLower = (c.paso || "").toLowerCase();
     if (seccionActiva === "Necesidad") return pasoLower.includes("necesidad");
-    if (seccionActiva === "Acción") return pasoLower.includes("accion");
+    if (seccionActiva === "Acción") return pasoLower.includes("acción");
     return false;
   });
 
@@ -153,7 +153,7 @@ export default function Sidebar({
   // Contadores globales por seccion
   const contadoresSeccion = {
     necesidad: conversaciones.filter((c) => (c.paso || "").toLowerCase().includes("necesidad")).length,
-    accion: conversaciones.filter((c) => (c.paso || "").toLowerCase().includes("accion")).length,
+    accion: conversaciones.filter((c) => (c.paso || "").toLowerCase().includes("acción")).length,
   };
 
   const handleConversacionClick = (guid: string) => {
