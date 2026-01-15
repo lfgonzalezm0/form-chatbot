@@ -14,7 +14,7 @@ export async function GET() {
         pregunta,
         estado,
         paso,
-        accion,
+        accionadmin,
         respuesta,
         creado
       FROM consultanecesidad

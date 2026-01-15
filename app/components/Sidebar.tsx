@@ -14,7 +14,7 @@ interface Conversacion {
   pregunta: string;
   estado: string;
   paso: string;
-  accion: string | null;
+  accionadmin: string | null;
   respuesta: string | null;
   creado: string;
 }

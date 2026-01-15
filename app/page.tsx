@@ -10,7 +10,7 @@ interface ConsultaData {
   enlace: string;
   estado: string;
   paso: string | null;
-  accion: string | null;
+  accionadmin: string | null;
   respuesta: string | null;
   telefonocliente: string | null;
 }
@@ -21,7 +21,7 @@ async function getConsultaData(guid: string): Promise<ConsultaData | null> {
   try {
     const result = await pool.query(
       `
-      SELECT pregunta, contexto, enlace, estado, paso, accionadmin AS accion, respuesta, telefonocliente
+      SELECT pregunta, contexto, enlace, estado, paso, accionadmin, respuesta, telefonocliente
       FROM consultanecesidad
       WHERE guid = $1
       LIMIT 1
@@ -182,19 +182,19 @@ export default async function Page({
               </div>
 
               {/* Accion elegida */}
-              {data.accion && (
+              {data.accionadmin && (
                 <div className="bubble-user">
-                  <div className="bubble-label" style={{ color: getAccionColor(data.accion) }}>
+                  <div className="bubble-label" style={{ color: getAccionColor(data.accionadmin) }}>
                     Accion elegida
                   </div>
-                  <p className="bubble-title" style={{ color: getAccionColor(data.accion) }}>
-                    {getAccionLabel(data.accion)}
+                  <p className="bubble-title" style={{ color: getAccionColor(data.accionadmin) }}>
+                    {getAccionLabel(data.accionadmin)}
                   </p>
                 </div>
               )}
 
               {/* Respuesta (si existe y la accion fue responder) */}
-              {data.accion === "responder" && data.respuesta && (
+              {data.accionadmin === "responder" && data.respuesta && (
                 <div className="bubble-user">
                   <div className="bubble-label" style={{ color: "#075e54" }}>
                     Respuesta enviada
