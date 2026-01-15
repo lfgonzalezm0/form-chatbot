@@ -5,11 +5,12 @@ import { useState } from "react";
 interface Props {
   guid: string;
   enlace: string;
+  onEnviado?: () => void;
 }
 
 type Opcion = "bloquear" | "ignorar" | "responder" | null;
 
-export default function FormularioRespuesta({ guid, enlace }: Props) {
+export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) {
   const [opcionSeleccionada, setOpcionSeleccionada] = useState<Opcion>(null);
   const [respuesta, setRespuesta] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -54,6 +55,9 @@ export default function FormularioRespuesta({ guid, enlace }: Props) {
       }
 
       setEnviado(true);
+      if (onEnviado) {
+        onEnviado();
+      }
     } catch (err) {
       console.error(err);
       setError("No se pudo enviar. Intenta nuevamente.");

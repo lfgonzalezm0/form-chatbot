@@ -1,14 +1,25 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useCallback } from "react";
 import Sidebar from "./Sidebar";
+import ConversacionDetalle from "./ConversacionDetalle";
 
-interface Props {
-  children: React.ReactNode;
-}
+export type Seccion = "Necesidad" | "Accion";
 
-export default function AppLayout({ children }: Props) {
+export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [seccionActiva, setSeccionActiva] = useState<Seccion>("Necesidad");
+  const [guidSeleccionado, setGuidSeleccionado] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleSeleccionConversacion = useCallback((guid: string) => {
+    setGuidSeleccionado(guid);
+    setSidebarOpen(false);
+  }, []);
+
+  const handleConversacionActualizada = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
 
   return (
     <div className="app-container">
@@ -23,7 +34,14 @@ export default function AppLayout({ children }: Props) {
       {/* Sidebar */}
       <div className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <Suspense fallback={<div className="sidebar-loading">Cargando...</div>}>
-          <Sidebar onClose={() => setSidebarOpen(false)} />
+          <Sidebar
+            seccionActiva={seccionActiva}
+            onSeccionChange={setSeccionActiva}
+            guidSeleccionado={guidSeleccionado}
+            onSeleccionConversacion={handleSeleccionConversacion}
+            onClose={() => setSidebarOpen(false)}
+            refreshKey={refreshKey}
+          />
         </Suspense>
       </div>
 
@@ -39,7 +57,10 @@ export default function AppLayout({ children }: Props) {
       </button>
 
       <main className="main-content">
-        {children}
+        <ConversacionDetalle
+          guid={guidSeleccionado}
+          onConversacionActualizada={handleConversacionActualizada}
+        />
       </main>
     </div>
   );

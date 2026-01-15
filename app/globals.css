@@ -72,6 +72,62 @@ body {
   color: #54656f;
 }
 
+/* Menu de secciones */
+.sidebar-secciones {
+  display: flex;
+  padding: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.seccion-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border: none;
+  background-color: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #667781;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+}
+
+.seccion-btn:hover {
+  background-color: #f5f6f6;
+}
+
+.seccion-btn.active {
+  color: #075e54;
+  border-bottom-color: #075e54;
+  background-color: #f0f2f5;
+}
+
+.seccion-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.seccion-count {
+  background-color: #e9edef;
+  color: #54656f;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.seccion-btn.active .seccion-count {
+  background-color: #075e54;
+  color: white;
+}
+
 /* Filtros */
 .sidebar-filtros {
   display: flex;

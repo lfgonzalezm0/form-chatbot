@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import type { Seccion } from "./AppLayout";
 
 interface SidebarProps {
+  seccionActiva: Seccion;
+  onSeccionChange: (seccion: Seccion) => void;
+  guidSeleccionado: string | null;
+  onSeleccionConversacion: (guid: string) => void;
   onClose?: () => void;
+  refreshKey?: number;
 }
 
 interface Conversacion {
@@ -69,23 +74,18 @@ function getEstadoIcon(estado: string) {
   );
 }
 
-export default function Sidebar({ onClose }: SidebarProps) {
+export default function Sidebar({
+  seccionActiva,
+  onSeccionChange,
+  guidSeleccionado,
+  onSeleccionConversacion,
+  onClose,
+  refreshKey,
+}: SidebarProps) {
   const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
-  const searchParams = useSearchParams();
-  const guidActual = searchParams.get("guid");
-const filtroParam = searchParams.get("filtro") as
-  | "todos"
-  | "pendiente"
-  | "cerrado"
-  | null;
-const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">(
-  filtroParam || "todos"
-);
-  useEffect(() => {
-    fetchConversaciones();
-  }, []);
+  const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">("todos");
 
   const fetchConversaciones = async () => {
     try {
@@ -101,7 +101,24 @@ const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">(
     }
   };
 
+  useEffect(() => {
+    fetchConversaciones();
+  }, []);
+
+  // Recargar cuando refreshKey cambie
+  useEffect(() => {
+    if (refreshKey && refreshKey > 0) {
+      fetchConversaciones();
+    }
+  }, [refreshKey]);
+
+  // Filtrar por seccion (paso) primero, luego por estado y busqueda
   const conversacionesFiltradas = conversaciones.filter((c) => {
+    // Filtro por seccion (paso)
+    const pasoLower = (c.paso || "").toLowerCase();
+    if (seccionActiva === "Necesidad" && !pasoLower.includes("necesidad")) return false;
+    if (seccionActiva === "Accion" && !pasoLower.includes("accion")) return false;
+
     // Filtro por estado
     if (filtro !== "todos" && c.estado !== filtro) return false;
 
@@ -119,14 +136,28 @@ const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">(
     return true;
   });
 
+  // Contadores basados en la seccion activa
+  const conversacionesSeccion = conversaciones.filter((c) => {
+    const pasoLower = (c.paso || "").toLowerCase();
+    if (seccionActiva === "Necesidad") return pasoLower.includes("necesidad");
+    if (seccionActiva === "Accion") return pasoLower.includes("accion");
+    return false;
+  });
+
   const contadores = {
-    todos: conversaciones.length,
-    pendiente: conversaciones.filter((c) => c.estado === "pendiente").length,
-    cerrado: conversaciones.filter((c) => c.estado === "cerrado").length,
+    todos: conversacionesSeccion.length,
+    pendiente: conversacionesSeccion.filter((c) => c.estado === "pendiente").length,
+    cerrado: conversacionesSeccion.filter((c) => c.estado === "cerrado").length,
   };
 
-  const handleConversacionClick = () => {
-    if (onClose) onClose();
+  // Contadores globales por seccion
+  const contadoresSeccion = {
+    necesidad: conversaciones.filter((c) => (c.paso || "").toLowerCase().includes("necesidad")).length,
+    accion: conversaciones.filter((c) => (c.paso || "").toLowerCase().includes("accion")).length,
+  };
+
+  const handleConversacionClick = (guid: string) => {
+    onSeleccionConversacion(guid);
   };
 
   return (
@@ -150,7 +181,31 @@ const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">(
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Menu principal de secciones */}
+      <div className="sidebar-secciones">
+        <button
+          className={`seccion-btn ${seccionActiva === "Necesidad" ? "active" : ""}`}
+          onClick={() => onSeccionChange("Necesidad")}
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+          </svg>
+          <span>Necesidad</span>
+          <span className="seccion-count">{contadoresSeccion.necesidad}</span>
+        </button>
+        <button
+          className={`seccion-btn ${seccionActiva === "Accion" ? "active" : ""}`}
+          onClick={() => onSeccionChange("Accion")}
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+          </svg>
+          <span>Accion</span>
+          <span className="seccion-count">{contadoresSeccion.accion}</span>
+        </button>
+      </div>
+
+      {/* Filtros de estado */}
       <div className="sidebar-filtros">
         <button
           className={`filtro-btn ${filtro === "todos" ? "active" : ""}`}
@@ -184,15 +239,14 @@ const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">(
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
             </svg>
-            <p>No hay conversaciones</p>
+            <p>No hay conversaciones en {seccionActiva}</p>
           </div>
         ) : (
           conversacionesFiltradas.map((conv) => (
-            <a
+            <div
               key={conv.guid}
-              href={`/?guid=${conv.guid}&filtro=${filtro}`}
-              className={`conversacion-item ${guidActual === conv.guid ? "active" : ""} ${conv.estado}`}
-              onClick={handleConversacionClick}
+              className={`conversacion-item ${guidSeleccionado === conv.guid ? "active" : ""} ${conv.estado}`}
+              onClick={() => handleConversacionClick(conv.guid)}
             >
               {/* Avatar con inicial del telefono */}
               <div className="conv-avatar">
@@ -220,7 +274,7 @@ const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">(
                   {getEstadoIcon(conv.estado)}
                 </div>
               </div>
-            </a>
+            </div>
           ))
         )}
       </div>
