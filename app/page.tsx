@@ -45,15 +45,14 @@ export default async function Page({
 
   if (!guid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <div className="text-red-500 text-4xl mb-4">&#10060;</div>
-          <h1 className="text-xl font-semibold text-gray-800">
-            Enlace invalido o incompleto
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Por favor, verifica el enlace e intenta nuevamente.
-          </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="chat-container">
+          <div className="bubble-bot">
+            <p className="text-center text-red-500">Enlace invalido o incompleto</p>
+            <p className="bubble-context text-center mt-2">
+              Por favor, verifica el enlace e intenta nuevamente.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -63,71 +62,76 @@ export default async function Page({
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <div className="text-red-500 text-4xl mb-4">&#10060;</div>
-          <h1 className="text-xl font-semibold text-gray-800">
-            Consulta no encontrada
-          </h1>
-          <p className="text-gray-600 mt-2">
-            No se encontro informacion para este enlace.
-          </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="chat-container">
+          <div className="bubble-bot">
+            <p className="text-center text-red-500">Consulta no encontrada</p>
+            <p className="bubble-context text-center mt-2">
+              No se encontro informacion para este enlace.
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white w-full max-w-lg rounded-lg shadow-md overflow-hidden">
-        <div className="bg-blue-600 text-white p-4">
-          <h1 className="text-xl font-semibold">Formulario de Consulta</h1>
+    <div className="min-h-screen flex flex-col">
+      {/* Header estilo WhatsApp */}
+      <div className="wa-header">
+        <div className="wa-header-avatar">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+          </svg>
         </div>
+        <div className="wa-header-info">
+          <span className="wa-header-name">Asistente</span>
+          <span className="wa-header-status">en linea</span>
+        </div>
+      </div>
 
-        <div className="p-6 space-y-6">
-          {/* Contexto */}
-          <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
-            <label className="block text-sm font-medium text-gray-500 mb-1">
-              Contexto
-            </label>
-            <p className="text-gray-800">{data.contexto}</p>
+      {/* Chat area */}
+      <div className="wa-chat-area">
+        <div className="chat-container">
+          {/* Burbuja de contexto */}
+          <div className="bubble-bot">
+            <div className="bubble-label">Contexto</div>
+            <p className="bubble-context">{data.contexto}</p>
+            <span className="bubble-time">
+              {new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+            </span>
           </div>
 
-          {/* Pregunta */}
-          <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600">
-            <label className="block text-sm font-medium text-blue-600 mb-1">
-              Pregunta
-            </label>
-            <p className="text-gray-800 font-medium">{data.pregunta}</p>
+          {/* Burbuja de pregunta */}
+          <div className="bubble-bot">
+            <div className="bubble-label">Pregunta</div>
+            <p className="bubble-title">{data.pregunta}</p>
+            <span className="bubble-time">
+              {new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+            </span>
           </div>
 
           {/* Formulario de respuesta */}
-          <form action={data.enlace} method="GET" className="space-y-4">
+          <form action={data.enlace} method="GET">
             <input type="hidden" name="guid" value={guid} />
 
-            <div>
-              <label
-                htmlFor="respuesta"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Tu respuesta
-              </label>
+            <div className="bubble-user">
               <textarea
-                id="respuesta"
                 name="respuesta"
-                rows={4}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-colors"
-                placeholder="Escribe tu respuesta aqui..."
+                className="chat-textarea"
+                placeholder="Escribe tu respuesta..."
+                rows={3}
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-            >
-              Enviar Respuesta
-            </button>
+            <div className="chat-actions">
+              <button type="submit" className="chat-send" title="Enviar">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+              </button>
+            </div>
           </form>
         </div>
       </div>
