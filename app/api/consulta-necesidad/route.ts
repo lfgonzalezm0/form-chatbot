@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   const result = await pool.query(
     `
     SELECT pregunta, contexto, enlace
-    FROM "consultaNecesidad"
+    FROM consultanecesidad
     WHERE guid = $1
     LIMIT 1
     `,
