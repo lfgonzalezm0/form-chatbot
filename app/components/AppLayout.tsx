@@ -4,7 +4,7 @@ import { Suspense, useState, useCallback } from "react";
 import Sidebar from "./Sidebar";
 import ConversacionDetalle from "./ConversacionDetalle";
 
-export type Seccion = "Necesidad" | "Accion";
+export type Seccion = "Necesidad" | "Acción";
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
