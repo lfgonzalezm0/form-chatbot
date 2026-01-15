@@ -73,6 +73,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [filtro, setFiltro] = useState<"todos" | "pendiente" | "completado">("todos");
+  const [busqueda, setBusqueda] = useState("");
   const searchParams = useSearchParams();
   const guidActual = searchParams.get("guid");
 
@@ -95,8 +96,21 @@ export default function Sidebar({ onClose }: SidebarProps) {
   };
 
   const conversacionesFiltradas = conversaciones.filter((c) => {
-    if (filtro === "todos") return true;
-    return c.estado === filtro;
+    // Filtro por estado
+    if (filtro !== "todos" && c.estado !== filtro) return false;
+
+    // Filtro por busqueda
+    if (busqueda.trim()) {
+      const searchLower = busqueda.toLowerCase();
+      return (
+        c.telefonocliente?.toLowerCase().includes(searchLower) ||
+        c.contexto?.toLowerCase().includes(searchLower) ||
+        c.pregunta?.toLowerCase().includes(searchLower) ||
+        c.paso?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return true;
   });
 
   const contadores = {
