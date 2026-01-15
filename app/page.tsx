@@ -28,8 +28,10 @@ export default async function Page({
 }: {
   searchParams: { guid?: string };
 }) {
-  const guid = searchParams?.guid;
 
+  console.log("searchParams:", searchParams);
+  
+  const guid = searchParams?.guid;
   // GUID no enviado
   if (!guid) {
     return (
