@@ -1,34 +1,68 @@
-import { headers } from "next/headers";
+type Consulta = {
+  pregunta: string;
+  contexto: string;
+};
 
-async function getConsulta() {
-  const headersList = await headers(); // 👈 await necesario
-  const host = headersList.get("host");
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-
+async function getConsulta(guid: string): Promise<Consulta | null> {
   const res = await fetch(
-    `${protocol}://${host}/api/consulta-necesidad`,
+    `/api/consulta-necesidad?guid=${guid}`,
     { cache: "no-store" }
   );
 
+  // Si no existe la consulta
+  if (res.status === 404) {
+    return null;
+  }
+
+  // Cualquier otro error
   if (!res.ok) {
-    throw new Error("Error cargando consulta");
+    console.error("Error API:", res.status);
+    return null;
   }
 
   return res.json();
 }
 
-export default async function FormularioWhatsapp() {
-  const data = await getConsulta();
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { guid?: string };
+}) {
+  const guid = searchParams?.guid;
+
+  // GUID no enviado
+  if (!guid) {
+    return (
+      <div className="chat-container">
+        <div className="bubble-bot">
+          Enlace inválido o incompleto.
+        </div>
+      </div>
+    );
+  }
+
+  const data = await getConsulta(guid);
+
+  // GUID no encontrado en BD
+  if (!data) {
+    return (
+      <div className="chat-container">
+        <div className="bubble-bot">
+          Consulta no encontrada o expirada.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="chat-container">
       <div className="bubble-bot">
         <div className="bubble-title">
-          {data?.pregunta ?? "Pregunta no disponible"}
+          {data.pregunta}
         </div>
 
         <div className="bubble-context">
-          {data?.contexto ?? "Sin contexto registrado"}
+          {data.contexto}
         </div>
       </div>
 
