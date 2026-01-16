@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 
+// URL base de la aplicación
+const APP_URL = "https://form-chatbot-production.up.railway.app";
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { enlace, accion, respuesta, guid } = body;
+    const { enlace, accion, respuesta, guid, imagen, video } = body;
 
     if (!enlace || !accion || !guid) {
       return NextResponse.json(
@@ -34,11 +37,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Generar urlimagen si hay imagen
+    const urlimagen = imagen ? `${APP_URL}/api/imagen-respuesta/${guid}` : null;
+
     // Preparar payload para n8n
     const n8nPayload = {
       guid,
       accion,
       respuesta: accion === "responder" ? respuesta : null,
+      urlimagen,
+      video: accion === "responder" ? video : null,
     };
 
     // Hacer POST al webhook de n8n
@@ -76,10 +84,22 @@ export async function POST(req: NextRequest) {
     await pool.query(
       `
       UPDATE consultanecesidad
-      SET estado = 'cerrado', accionadmin = $2, respuesta = $3
+      SET estado = 'cerrado',
+          accionadmin = $2,
+          respuesta = $3,
+          imagen = $4,
+          video = $5,
+          urlimagen = $6
       WHERE guid = $1
       `,
-      [guid, accion, accion === "responder" ? respuesta : null]
+      [
+        guid,
+        accion,
+        accion === "responder" ? respuesta : null,
+        accion === "responder" ? imagen : null,
+        accion === "responder" ? video : null,
+        urlimagen
+      ]
     );
 
     console.log("Estado actualizado para GUID:", guid, "- Accion:", accion);

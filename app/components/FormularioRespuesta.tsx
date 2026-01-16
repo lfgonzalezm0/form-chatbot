@@ -13,9 +13,35 @@ type Opcion = "bloquear" | "ignorar" | "responder" | null;
 export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) {
   const [opcionSeleccionada, setOpcionSeleccionada] = useState<Opcion>(null);
   const [respuesta, setRespuesta] = useState("");
+  const [imagen, setImagen] = useState<string | null>(null);
+  const [video, setVideo] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState("");
+
+  const manejarCambioImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = e.target.files?.[0];
+    if (archivo) {
+      if (archivo.size > 5 * 1024 * 1024) {
+        setError("La imagen no debe superar 5MB");
+        return;
+      }
+      if (!archivo.type.startsWith("image/")) {
+        setError("Solo se permiten archivos de imagen");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagen(reader.result as string);
+        setError("");
+      };
+      reader.readAsDataURL(archivo);
+    }
+  };
+
+  const quitarImagen = () => {
+    setImagen(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +66,8 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
         enlace,
         accion: opcionSeleccionada,
         respuesta: opcionSeleccionada === "responder" ? respuesta.trim() : null,
+        imagen: opcionSeleccionada === "responder" ? imagen : null,
+        video: opcionSeleccionada === "responder" && video.trim() ? video.trim() : null,
       };
 
       const res = await fetch("/api/enviar-respuesta", {
@@ -152,19 +180,70 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
 
       {/* Campo de respuesta (solo si selecciono responder) */}
       {opcionSeleccionada === "responder" && (
-        <div className="bubble-user">
-          <textarea
-            value={respuesta}
-            onChange={(e) => {
-              setRespuesta(e.target.value);
-              setError("");
-            }}
-            disabled={enviando}
-            className="chat-textarea"
-            placeholder="Escribe tu respuesta..."
-            rows={3}
-          />
-        </div>
+        <>
+          <div className="bubble-user">
+            <textarea
+              value={respuesta}
+              onChange={(e) => {
+                setRespuesta(e.target.value);
+                setError("");
+              }}
+              disabled={enviando}
+              className="chat-textarea"
+              placeholder="Escribe tu respuesta..."
+              rows={3}
+            />
+          </div>
+
+          {/* Campo de imagen */}
+          <div className="bubble-user">
+            <div className="adjunto-label">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+              </svg>
+              <span>Imagen (opcional, max 5MB)</span>
+            </div>
+            {imagen ? (
+              <div className="adjunto-preview">
+                <img src={imagen} alt="Preview" />
+                <button type="button" className="btn-quitar-adjunto" onClick={quitarImagen}>
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
+                  Quitar
+                </button>
+              </div>
+            ) : (
+              <label className="adjunto-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={manejarCambioImagen}
+                  disabled={enviando}
+                />
+                <span>Haz clic para seleccionar imagen</span>
+              </label>
+            )}
+          </div>
+
+          {/* Campo de video */}
+          <div className="bubble-user">
+            <div className="adjunto-label">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+              </svg>
+              <span>Enlace de Video (opcional)</span>
+            </div>
+            <input
+              type="url"
+              value={video}
+              onChange={(e) => setVideo(e.target.value)}
+              disabled={enviando}
+              className="chat-input-url"
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+          </div>
+        </>
       )}
 
       {/* Mensaje de error */}
