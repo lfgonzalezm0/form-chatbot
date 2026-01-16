@@ -8,17 +8,19 @@ export async function GET() {
     const result = await pool.query(
       `
       SELECT
-        guid,
-        telefonocliente,
-        contexto,
-        pregunta,
-        estado,
-        paso,
-        accionadmin,
-        respuesta,
-        creado
-      FROM consultanecesidad
-      ORDER BY creado DESC
+        c.guid,
+        c.telefonocliente,
+        c.contexto,
+        c.pregunta,
+        c.estado,
+        c.paso,
+        c.accionadmin,
+        c.respuesta,
+        c.creado,
+        u.nombre as nombreusuario
+      FROM consultanecesidad c
+      LEFT JOIN usuariossystem u ON c.telefonocliente = u.telefono
+      ORDER BY c.creado DESC
       `
     );
 

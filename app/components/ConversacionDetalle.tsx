@@ -13,6 +13,7 @@ interface Conversacion {
   enlace: string;
   accionadmin: string | null;
   respuesta: string | null;
+  nombreusuario: string | null;
 }
 
 interface Props {
@@ -173,7 +174,9 @@ export default function ConversacionDetalle({ guid, onConversacionActualizada }:
             </svg>
           </div>
           <div className="wa-header-info">
-            <span className="wa-header-name">{conversacion.telefonocliente || "Cliente"}</span>
+            <span className="wa-header-name">
+              {conversacion.nombreusuario || conversacion.telefonocliente || "Cliente"}
+            </span>
             <span className="wa-header-status">
               {conversacion.paso || "Conversacion"} - Completado
             </span>
@@ -239,7 +242,9 @@ export default function ConversacionDetalle({ guid, onConversacionActualizada }:
           </svg>
         </div>
         <div className="wa-header-info">
-          <span className="wa-header-name">{conversacion.telefonocliente || "Cliente"}</span>
+          <span className="wa-header-name">
+            {conversacion.nombreusuario || conversacion.telefonocliente || "Cliente"}
+          </span>
           <span className="wa-header-status">
             {conversacion.paso || "Conversacion"} - Pendiente
           </span>

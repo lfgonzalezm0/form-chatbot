@@ -20,18 +20,20 @@ export async function GET(
     const result = await pool.query(
       `
       SELECT
-        guid,
-        telefonocliente,
-        contexto,
-        pregunta,
-        estado,
-        paso,
-        enlace,
-        accionadmin,
-        respuesta,
-        creado
-      FROM consultanecesidad
-      WHERE guid = $1
+        c.guid,
+        c.telefonocliente,
+        c.contexto,
+        c.pregunta,
+        c.estado,
+        c.paso,
+        c.enlace,
+        c.accionadmin,
+        c.respuesta,
+        c.creado,
+        u.nombre as nombreusuario
+      FROM consultanecesidad c
+      LEFT JOIN usuariossystem u ON c.telefonocliente = u.telefono
+      WHERE c.guid = $1
       LIMIT 1
       `,
       [guid]
