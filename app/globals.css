@@ -3550,3 +3550,376 @@ body {
     margin: 10px;
   }
 }
+
+/* ============================================
+   TRANSICIONES DE PAGINA
+   ============================================ */
+.page-transition {
+  width: 100%;
+  min-height: 100vh;
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+.page-transition.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition.transitioning {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* ============================================
+   MENU DE NAVEGACION
+   ============================================ */
+.nav-menu-container {
+  position: relative;
+  z-index: 50;
+}
+
+.nav-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 24px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-menu-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.nav-menu-trigger.open {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-menu-trigger-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-menu-trigger-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-menu-trigger-label {
+  display: none;
+}
+
+.nav-menu-chevron {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.nav-menu-trigger.open .nav-menu-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 280px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.95);
+  transform-origin: top left;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.nav-menu-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.nav-menu-header {
+  padding: 12px 16px;
+  background-color: #f0f2f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.nav-menu-header span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #667781;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-menu-items {
+  padding: 8px 0;
+}
+
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #111;
+  transition: all 0.15s ease;
+}
+
+.nav-menu-item:hover {
+  background-color: #f5f6f6;
+}
+
+.nav-menu-item.active {
+  background-color: #dcf8c6;
+}
+
+.nav-menu-item-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e8f5e9;
+  border-radius: 10px;
+  color: #075e54;
+  transition: all 0.15s ease;
+}
+
+.nav-menu-item:hover .nav-menu-item-icon {
+  background-color: #c8e6c9;
+}
+
+.nav-menu-item.active .nav-menu-item-icon {
+  background-color: #075e54;
+  color: white;
+}
+
+.nav-menu-item-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-menu-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-menu-item-label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #111;
+}
+
+.nav-menu-item-description {
+  font-size: 12px;
+  color: #667781;
+}
+
+.nav-menu-item-check {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #25d366;
+}
+
+.nav-menu-item-check svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Sidebar header con nav menu */
+.sidebar-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ============================================
+   TRANSICIONES GLOBALES
+   ============================================ */
+/* Transiciones suaves para elementos interactivos */
+button,
+a,
+input,
+select,
+textarea {
+  transition: all 0.2s ease;
+}
+
+/* Transiciones para tablas */
+.registros-tabla tbody tr,
+.usuarios-tabla tbody tr,
+.admin-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+/* Transiciones para cards y panels */
+.pregunta-card,
+.necesidad-item,
+.conversacion-item {
+  transition: all 0.15s ease;
+}
+
+/* Transiciones para modales */
+.modal-overlay {
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Transiciones para listas */
+.lista-necesidades .necesidad-item,
+.lista-preguntas .pregunta-card,
+.sidebar-lista .conversacion-item {
+  animation: fadeInUp 0.3s ease backwards;
+}
+
+.lista-necesidades .necesidad-item:nth-child(1),
+.lista-preguntas .pregunta-card:nth-child(1) { animation-delay: 0.02s; }
+.lista-necesidades .necesidad-item:nth-child(2),
+.lista-preguntas .pregunta-card:nth-child(2) { animation-delay: 0.04s; }
+.lista-necesidades .necesidad-item:nth-child(3),
+.lista-preguntas .pregunta-card:nth-child(3) { animation-delay: 0.06s; }
+.lista-necesidades .necesidad-item:nth-child(4),
+.lista-preguntas .pregunta-card:nth-child(4) { animation-delay: 0.08s; }
+.lista-necesidades .necesidad-item:nth-child(5),
+.lista-preguntas .pregunta-card:nth-child(5) { animation-delay: 0.1s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Transicion para badges y toggles */
+.badge-toggle,
+.badge-categoria,
+.badge-deshabilitado,
+.variante-tag {
+  transition: all 0.15s ease;
+}
+
+/* Transiciones para el sidebar */
+.sidebar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-overlay {
+  transition: opacity 0.3s ease;
+}
+
+/* Transicion para filtros */
+.panel-filtros,
+.usuarios-filtros,
+.registros-filtros {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Hover effects con transiciones */
+.btn-crear-verde:hover,
+.btn-guardar-verde:hover,
+.admin-btn-crear:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(7, 94, 84, 0.25);
+}
+
+.btn-accion-mini:hover {
+  transform: scale(1.1);
+}
+
+/* Pulse animation para elementos activos */
+.necesidad-item.seleccionada {
+  animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+
+/* Transicion suave para paneles */
+.panel-necesidades,
+.panel-preguntas {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* Loading spinner con animacion mas suave */
+.loading-spinner {
+  transition: opacity 0.2s ease;
+}
+
+/* Mensaje flotante con mejor animacion */
+.mensaje-flotante {
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive para nav menu */
+@media (min-width: 480px) {
+  .nav-menu-trigger-label {
+    display: inline;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-menu-dropdown {
+    min-width: 260px;
+  }
+
+  .nav-menu-item-description {
+    display: none;
+  }
+}
