@@ -80,3 +80,36 @@ export async function PUT(
     );
   }
 }
+
+// DELETE: Eliminar un usuario
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM usuariossystem WHERE id = $1 RETURNING id`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: "Usuario no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Usuario eliminado correctamente"
+    });
+  } catch (error) {
+    console.error("Error al eliminar usuario:", error);
+    return NextResponse.json(
+      { error: "Error al eliminar usuario" },
+      { status: 500 }
+    );
+  }
+}

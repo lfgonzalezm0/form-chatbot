@@ -52,13 +52,8 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Para aprobar es boolean, para asignacion es texto
-    let valorFinal: boolean | string;
-    if (campo === "aprobar") {
-      valorFinal = valor === true || valor === "activar";
-    } else {
-      valorFinal = valor === true || valor === "activar" ? "activar" : "desactivar";
-    }
+    // Ambos campos son boolean
+    const valorFinal = valor === true || valor === "activar";
 
     const placeholders = ids.map((_, i) => `$${i + 2}`).join(", ");
     const query = `

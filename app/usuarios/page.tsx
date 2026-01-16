@@ -11,7 +11,7 @@ interface Usuario {
   contrasena: string | null;
   proceso: string | null;
   aprobar: boolean | null;
-  asignacion: string | null;
+  asignacion: boolean | null;
 }
 
 interface UsuarioEditando {
@@ -41,6 +41,9 @@ export default function UsuariosPage() {
 
   // Mensaje de exito
   const [mensaje, setMensaje] = useState<string | null>(null);
+
+  // Confirmacion de eliminacion
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState<number | null>(null);
 
   useEffect(() => {
     fetchUsuarios();
@@ -80,12 +83,13 @@ export default function UsuariosPage() {
     }
 
     if (filtroAprobar !== "todos") {
-      const valor = filtroAprobar === "activar";
+      const valor = filtroAprobar === "activado";
       resultado = resultado.filter((u) => u.aprobar === valor);
     }
 
     if (filtroAsignacion !== "todos") {
-      resultado = resultado.filter((u) => u.asignacion === filtroAsignacion);
+      const valor = filtroAsignacion === "activado";
+      resultado = resultado.filter((u) => u.asignacion === valor);
     }
 
     setUsuariosFiltrados(resultado);
@@ -104,8 +108,12 @@ export default function UsuariosPage() {
 
   // Iniciar edicion
   const iniciarEdicion = (id: number, campo: string, valorActual: string | boolean | null) => {
+    if (campo === "aprobar" || campo === "asignacion") {
+      setValorEditando(valorActual ? "activar" : "desactivar");
+    } else {
+      setValorEditando(String(valorActual ?? ""));
+    }
     setEditando({ id, campo, valor: valorActual ?? "" });
-    setValorEditando(String(valorActual ?? ""));
   };
 
   // Cancelar edicion
@@ -122,10 +130,8 @@ export default function UsuariosPage() {
     try {
       const payload: Record<string, string | boolean> = {};
 
-      if (editando.campo === "aprobar") {
+      if (editando.campo === "aprobar" || editando.campo === "asignacion") {
         payload[editando.campo] = valorEditando === "activar";
-      } else if (editando.campo === "asignacion") {
-        payload[editando.campo] = valorEditando;
       } else {
         payload[editando.campo] = valorEditando;
       }
@@ -142,7 +148,13 @@ export default function UsuariosPage() {
       setUsuarios((prev) =>
         prev.map((u) =>
           u.id === editando.id
-            ? { ...u, [editando.campo]: editando.campo === "aprobar" ? valorEditando === "activar" : valorEditando }
+            ? {
+                ...u,
+                [editando.campo]:
+                  editando.campo === "aprobar" || editando.campo === "asignacion"
+                    ? valorEditando === "activar"
+                    : valorEditando,
+              }
             : u
         )
       );
@@ -154,6 +166,28 @@ export default function UsuariosPage() {
       mostrarMensaje("Error al guardar cambios");
     } finally {
       setGuardando(false);
+    }
+  };
+
+  // Eliminar usuario
+  const eliminarUsuario = async (id: number) => {
+    setGuardando(true);
+    try {
+      const res = await fetch(`/api/usuarios/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Error al eliminar");
+
+      setUsuarios((prev) => prev.filter((u) => u.id !== id));
+      setSeleccionados((prev) => prev.filter((i) => i !== id));
+      mostrarMensaje("Usuario eliminado correctamente");
+    } catch (err) {
+      console.error(err);
+      mostrarMensaje("Error al eliminar usuario");
+    } finally {
+      setGuardando(false);
+      setConfirmandoEliminar(null);
     }
   };
 
@@ -174,7 +208,7 @@ export default function UsuariosPage() {
   };
 
   // Accion masiva
-  const accionMasiva = async (campo: "aprobar" | "asignacion", valor: string) => {
+  const accionMasiva = async (campo: "aprobar" | "asignacion", valor: boolean) => {
     if (seleccionados.length === 0) {
       mostrarMensaje("Selecciona al menos un usuario");
       return;
@@ -188,19 +222,15 @@ export default function UsuariosPage() {
         body: JSON.stringify({
           ids: seleccionados,
           campo,
-          valor,
+          valor: valor ? "activar" : "desactivar",
         }),
       });
 
       if (!res.ok) throw new Error("Error al actualizar");
 
-      // Actualizar estado local
-      const valorFinal = campo === "aprobar" ? valor === "activar" : valor;
       setUsuarios((prev) =>
         prev.map((u) =>
-          seleccionados.includes(u.id)
-            ? { ...u, [campo]: valorFinal }
-            : u
+          seleccionados.includes(u.id) ? { ...u, [campo]: valor } : u
         )
       );
 
@@ -280,8 +310,8 @@ export default function UsuariosPage() {
             <label>Aprobar</label>
             <select value={filtroAprobar} onChange={(e) => setFiltroAprobar(e.target.value)}>
               <option value="todos">Todos</option>
-              <option value="activar">Activado</option>
-              <option value="desactivar">Desactivado</option>
+              <option value="activado">Activado</option>
+              <option value="desactivado">Desactivado</option>
             </select>
           </div>
 
@@ -289,8 +319,8 @@ export default function UsuariosPage() {
             <label>Asignacion</label>
             <select value={filtroAsignacion} onChange={(e) => setFiltroAsignacion(e.target.value)}>
               <option value="todos">Todos</option>
-              <option value="activar">Activar</option>
-              <option value="desactivar">Desactivar</option>
+              <option value="activado">Activado</option>
+              <option value="desactivado">Desactivado</option>
             </select>
           </div>
 
@@ -302,46 +332,74 @@ export default function UsuariosPage() {
         </div>
       </div>
 
-      {/* Acciones masivas */}
+      {/* Acciones masivas - Nuevo diseño */}
       {seleccionados.length > 0 && (
-        <div className="acciones-masivas">
-          <span>{seleccionados.length} seleccionados</span>
-          <div className="acciones-masivas-btns">
-            <button
-              className="btn-masivo activar"
-              onClick={() => accionMasiva("aprobar", "activar")}
-              disabled={guardando}
-            >
-              Activar Aprobar
-            </button>
-            <button
-              className="btn-masivo desactivar"
-              onClick={() => accionMasiva("aprobar", "desactivar")}
-              disabled={guardando}
-            >
-              Desactivar Aprobar
-            </button>
-            <button
-              className="btn-masivo activar"
-              onClick={() => accionMasiva("asignacion", "activar")}
-              disabled={guardando}
-            >
-              Activar Asignacion
-            </button>
-            <button
-              className="btn-masivo desactivar"
-              onClick={() => accionMasiva("asignacion", "desactivar")}
-              disabled={guardando}
-            >
-              Desactivar Asignacion
-            </button>
-            <button
-              className="btn-cancelar-seleccion"
-              onClick={() => setSeleccionados([])}
-            >
-              Cancelar
-            </button>
+        <div className="acciones-masivas-panel">
+          <div className="acciones-masivas-info">
+            <span className="seleccionados-count">{seleccionados.length}</span>
+            <span>usuarios seleccionados</span>
           </div>
+
+          <div className="acciones-masivas-grupos">
+            <div className="acciones-grupo">
+              <span className="grupo-label">Aprobar</span>
+              <div className="grupo-btns">
+                <button
+                  className="btn-accion-masiva activar"
+                  onClick={() => accionMasiva("aprobar", true)}
+                  disabled={guardando}
+                  title="Activar Aprobar"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                </button>
+                <button
+                  className="btn-accion-masiva desactivar"
+                  onClick={() => accionMasiva("aprobar", false)}
+                  disabled={guardando}
+                  title="Desactivar Aprobar"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="acciones-grupo">
+              <span className="grupo-label">Asignacion</span>
+              <div className="grupo-btns">
+                <button
+                  className="btn-accion-masiva activar"
+                  onClick={() => accionMasiva("asignacion", true)}
+                  disabled={guardando}
+                  title="Activar Asignacion"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                </button>
+                <button
+                  className="btn-accion-masiva desactivar"
+                  onClick={() => accionMasiva("asignacion", false)}
+                  disabled={guardando}
+                  title="Desactivar Asignacion"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button
+            className="btn-cancelar-seleccion"
+            onClick={() => setSeleccionados([])}
+          >
+            Cancelar
+          </button>
         </div>
       )}
 
@@ -365,12 +423,13 @@ export default function UsuariosPage() {
               <th>Proceso</th>
               <th>Aprobar</th>
               <th>Asignacion</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {usuariosFiltrados.length === 0 ? (
               <tr>
-                <td colSpan={9} className="tabla-vacia">
+                <td colSpan={10} className="tabla-vacia">
                   No se encontraron usuarios
                 </td>
               </tr>
@@ -514,7 +573,7 @@ export default function UsuariosPage() {
                   {/* Aprobar */}
                   <td
                     className="celda-editable"
-                    onClick={() => iniciarEdicion(usuario.id, "aprobar", usuario.aprobar ? "activar" : "desactivar")}
+                    onClick={() => iniciarEdicion(usuario.id, "aprobar", usuario.aprobar)}
                   >
                     {editando?.id === usuario.id && editando?.campo === "aprobar" ? (
                       <div className="edicion-inline">
@@ -555,9 +614,41 @@ export default function UsuariosPage() {
                         <button onClick={cancelarEdicion} className="btn-cancelar-inline">✕</button>
                       </div>
                     ) : (
-                      <span className={`badge-toggle ${usuario.asignacion === "activar" ? "activado" : "desactivado"}`}>
-                        {usuario.asignacion === "activar" ? "Activar" : "Desactivar"}
+                      <span className={`badge-toggle ${usuario.asignacion ? "activado" : "desactivado"}`}>
+                        {usuario.asignacion ? "Activado" : "Desactivado"}
                       </span>
+                    )}
+                  </td>
+
+                  {/* Acciones */}
+                  <td className="col-acciones">
+                    {confirmandoEliminar === usuario.id ? (
+                      <div className="confirmar-eliminar">
+                        <span>Eliminar?</span>
+                        <button
+                          className="btn-confirmar-si"
+                          onClick={() => eliminarUsuario(usuario.id)}
+                          disabled={guardando}
+                        >
+                          Si
+                        </button>
+                        <button
+                          className="btn-confirmar-no"
+                          onClick={() => setConfirmandoEliminar(null)}
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="btn-eliminar"
+                        onClick={() => setConfirmandoEliminar(usuario.id)}
+                        title="Eliminar usuario"
+                      >
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                      </button>
                     )}
                   </td>
                 </tr>

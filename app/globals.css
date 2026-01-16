@@ -1533,71 +1533,190 @@ body {
   color: #c62828;
 }
 
-/* Acciones masivas */
-.acciones-masivas {
-  background-color: #e3f2fd;
-  padding: 12px 24px;
+/* Acciones masivas - Nuevo diseño */
+.acciones-masivas-panel {
+  background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #bbdefb;
+  gap: 24px;
+  box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
 }
 
-.acciones-masivas span {
-  font-weight: 600;
-  color: #1565c0;
-}
-
-.acciones-masivas-btns {
+.acciones-masivas-info {
   display: flex;
+  align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  color: white;
 }
 
-.btn-masivo {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
+.seleccionados-count {
+  background-color: white;
+  color: #1565c0;
+  font-weight: 700;
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acciones-masivas-grupos {
+  display: flex;
+  gap: 24px;
+}
+
+.acciones-grupo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.grupo-label {
+  color: rgba(255, 255, 255, 0.9);
   font-size: 12px;
   font-weight: 500;
+  min-width: 70px;
+}
+
+.grupo-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-accion-masiva {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
 }
 
-.btn-masivo.activar {
+.btn-accion-masiva svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-accion-masiva.activar {
   background-color: #4caf50;
   color: white;
 }
 
-.btn-masivo.activar:hover {
+.btn-accion-masiva.activar:hover {
   background-color: #43a047;
+  transform: scale(1.05);
 }
 
-.btn-masivo.desactivar {
+.btn-accion-masiva.desactivar {
   background-color: #f44336;
   color: white;
 }
 
-.btn-masivo.desactivar:hover {
+.btn-accion-masiva.desactivar:hover {
   background-color: #e53935;
+  transform: scale(1.05);
 }
 
-.btn-masivo:disabled {
+.btn-accion-masiva:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-cancelar-seleccion {
-  padding: 8px 16px;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  padding: 10px 20px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
+  color: white;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn-cancelar-seleccion:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Columna de acciones */
+.col-acciones {
+  width: 120px;
+  white-space: nowrap;
+}
+
+.btn-eliminar {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background-color: #ffebee;
+  color: #c62828;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-eliminar:hover {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-eliminar svg {
+  width: 18px;
+  height: 18px;
+}
+
+.confirmar-eliminar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.confirmar-eliminar span {
+  color: #c62828;
+  font-weight: 500;
+}
+
+.btn-confirmar-si,
+.btn-confirmar-no {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-confirmar-si {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-confirmar-si:hover {
+  background-color: #d32f2f;
+}
+
+.btn-confirmar-no {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-confirmar-no:hover {
+  background-color: #bdbdbd;
 }
 
 /* Mensaje flotante */
@@ -1645,13 +1764,20 @@ body {
     padding: 8px 6px;
   }
 
-  .acciones-masivas {
+  .acciones-masivas-panel {
     flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
   }
 
-  .acciones-masivas-btns {
+  .acciones-masivas-grupos {
+    flex-direction: column;
+    gap: 12px;
     width: 100%;
+  }
+
+  .acciones-grupo {
+    width: 100%;
+    justify-content: space-between;
   }
 }
