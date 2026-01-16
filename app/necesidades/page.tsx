@@ -9,6 +9,7 @@ interface Necesidad {
   telefonocaso: string | null;
   categoria: string | null;
   necesidad: string | null;
+  descripcion: string | null;
   habilitado: boolean | null;
 }
 
@@ -188,7 +189,7 @@ export default function NecesidadesPage() {
 
   // CRUD Necesidades
   const abrirModalCrearNecesidad = () => {
-    setFormNecesidad({ categoria: CATEGORIAS[0], habilitado: true });
+    setFormNecesidad({ categoria: CATEGORIAS[0], descripcion: "", habilitado: true });
     setNecesidadEditando(null);
     setModalNecesidad("crear");
   };
@@ -936,6 +937,15 @@ export default function NecesidadesPage() {
                   placeholder="Nombre de la necesidad"
                   value={formNecesidad.necesidad || ""}
                   onChange={(e) => setFormNecesidad({ ...formNecesidad, necesidad: e.target.value })}
+                />
+              </div>
+              <div className="form-field">
+                <label>Descripcion</label>
+                <textarea
+                  placeholder="Descripcion de la necesidad..."
+                  rows={4}
+                  value={formNecesidad.descripcion || ""}
+                  onChange={(e) => setFormNecesidad({ ...formNecesidad, descripcion: e.target.value })}
                 />
               </div>
               <div className="form-field">

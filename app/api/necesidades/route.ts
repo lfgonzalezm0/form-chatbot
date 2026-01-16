@@ -26,6 +26,7 @@ export async function GET() {
         telefonocaso,
         categoria,
         necesidad,
+        descripcion,
         habilitado
       FROM necesidadessystem
     `;
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
 
     const session = JSON.parse(sessionCookie.value);
     const body = await req.json();
-    const { categoria, necesidad, habilitado } = body;
+    const { categoria, necesidad, descripcion, habilitado } = body;
 
     if (!categoria || !necesidad) {
       return NextResponse.json(
@@ -79,10 +80,10 @@ export async function POST(req: NextRequest) {
     const telefonocaso = session.telefono;
 
     const result = await pool.query(
-      `INSERT INTO necesidadessystem (telefonocaso, categoria, necesidad, habilitado)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO necesidadessystem (telefonocaso, categoria, necesidad, descripcion, habilitado)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [telefonocaso, categoria, necesidad, habilitado ?? true]
+      [telefonocaso, categoria, necesidad, descripcion || null, habilitado ?? true]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });
