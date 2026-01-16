@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
         necesidad,
         pregunta,
         respuesta,
-        variante
+        variante,
+        imagen
       FROM preguntassystem
       WHERE 1=1
     `;
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest) {
 
     const session = JSON.parse(sessionCookie.value);
     const body = await req.json();
-    const { categoria, necesidad, pregunta, respuesta, variante } = body;
+    const { categoria, necesidad, pregunta, respuesta, variante, imagen } = body;
 
     if (!categoria || !necesidad || !pregunta) {
       return NextResponse.json(
@@ -104,10 +105,10 @@ export async function POST(req: NextRequest) {
     const telefonocaso = session.telefono;
 
     const result = await pool.query(
-      `INSERT INTO preguntassystem (telefonocaso, categoria, necesidad, pregunta, respuesta, variante)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO preguntassystem (telefonocaso, categoria, necesidad, pregunta, respuesta, variante, imagen)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [telefonocaso, categoria, necesidad, pregunta, respuesta || null, variante || null]
+      [telefonocaso, categoria, necesidad, pregunta, respuesta || null, variante || null, imagen || null]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });

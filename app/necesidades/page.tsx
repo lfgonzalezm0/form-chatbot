@@ -20,6 +20,7 @@ interface Pregunta {
   pregunta: string | null;
   respuesta: string | null;
   variante: string | null;
+  imagen: string | null;
 }
 
 const CATEGORIAS = [
@@ -69,6 +70,7 @@ export default function NecesidadesPage() {
   const [formPregunta, setFormPregunta] = useState<Partial<Pregunta>>({});
   const [variantes, setVariantes] = useState<string[]>([]);
   const [nuevaVariante, setNuevaVariante] = useState("");
+  const [imagenPreview, setImagenPreview] = useState<string | null>(null);
 
   // Necesidad en edicion
   const [necesidadEditando, setNecesidadEditando] = useState<Necesidad | null>(null);
@@ -267,6 +269,7 @@ export default function NecesidadesPage() {
     });
     setVariantes([]);
     setNuevaVariante("");
+    setImagenPreview(null);
     setPreguntaEditando(null);
     setModalPregunta("crear");
   };
@@ -275,8 +278,39 @@ export default function NecesidadesPage() {
     setFormPregunta({ ...p });
     setVariantes(p.variante ? p.variante.split(";").filter(Boolean) : []);
     setNuevaVariante("");
+    setImagenPreview(p.imagen || null);
     setPreguntaEditando(p);
     setModalPregunta("editar");
+  };
+
+  const manejarCambioImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = e.target.files?.[0];
+    if (archivo) {
+      // Validar tamaño (max 5MB)
+      if (archivo.size > 5 * 1024 * 1024) {
+        setError("La imagen no debe superar 5MB");
+        return;
+      }
+
+      // Validar tipo
+      if (!archivo.type.startsWith("image/")) {
+        setError("Solo se permiten archivos de imagen");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setImagenPreview(base64);
+        setFormPregunta({ ...formPregunta, imagen: base64 });
+      };
+      reader.readAsDataURL(archivo);
+    }
+  };
+
+  const quitarImagen = () => {
+    setImagenPreview(null);
+    setFormPregunta({ ...formPregunta, imagen: null });
   };
 
   const agregarVariante = () => {
@@ -302,6 +336,7 @@ export default function NecesidadesPage() {
     const datosGuardar = {
       ...formPregunta,
       variante: variantes.length > 0 ? variantes.join(";") : null,
+      imagen: imagenPreview,
     };
 
     try {
@@ -651,6 +686,11 @@ export default function NecesidadesPage() {
                             </div>
                           </div>
                         )}
+                        {p.imagen && (
+                          <div className="pregunta-imagen">
+                            <img src={p.imagen} alt="Imagen adjunta" />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))
@@ -846,6 +886,37 @@ export default function NecesidadesPage() {
                         </span>
                       ))}
                     </div>
+                  )}
+                </div>
+              </div>
+              <div className="form-field">
+                <label>Imagen (opcional, max 5MB)</label>
+                <div className="imagen-upload-container">
+                  {imagenPreview ? (
+                    <div className="imagen-preview-container">
+                      <img src={imagenPreview} alt="Preview" className="imagen-preview" />
+                      <button className="btn-quitar-imagen" onClick={quitarImagen} type="button">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                        Quitar imagen
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="imagen-upload-label">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={manejarCambioImagen}
+                        className="imagen-input-hidden"
+                      />
+                      <div className="imagen-upload-placeholder">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                        </svg>
+                        <span>Haz clic para seleccionar imagen</span>
+                      </div>
+                    </label>
                   )}
                 </div>
               </div>

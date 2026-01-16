@@ -92,7 +92,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { categoria, necesidad, pregunta, respuesta, variante } = body;
+    const { categoria, necesidad, pregunta, respuesta, variante, imagen } = body;
 
     const result = await pool.query(
       `UPDATE preguntassystem
@@ -100,10 +100,11 @@ export async function PUT(
            necesidad = COALESCE($3, necesidad),
            pregunta = COALESCE($4, pregunta),
            respuesta = COALESCE($5, respuesta),
-           variante = COALESCE($6, variante)
+           variante = COALESCE($6, variante),
+           imagen = $7
        WHERE id = $1
        RETURNING *`,
-      [id, categoria, necesidad, pregunta, respuesta, variante]
+      [id, categoria, necesidad, pregunta, respuesta, variante, imagen !== undefined ? imagen : null]
     );
 
     return NextResponse.json(result.rows[0]);
