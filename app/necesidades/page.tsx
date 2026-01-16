@@ -21,6 +21,7 @@ interface Pregunta {
   respuesta: string | null;
   variante: string | null;
   imagen: string | null;
+  video: string | null;
 }
 
 const CATEGORIAS = [
@@ -691,6 +692,16 @@ export default function NecesidadesPage() {
                             <img src={p.imagen} alt="Imagen adjunta" />
                           </div>
                         )}
+                        {p.video && (
+                          <div className="pregunta-video">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                            </svg>
+                            <a href={p.video} target="_blank" rel="noopener noreferrer">
+                              {p.video}
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))
@@ -919,6 +930,22 @@ export default function NecesidadesPage() {
                     </label>
                   )}
                 </div>
+              </div>
+              <div className="form-field">
+                <label>Enlace de Video (opcional)</label>
+                <div className="video-input-container">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="video-input-icon">
+                    <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                  </svg>
+                  <input
+                    type="url"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={formPregunta.video || ""}
+                    onChange={(e) => setFormPregunta({ ...formPregunta, video: e.target.value || null })}
+                    className="video-url-input"
+                  />
+                </div>
+                <span className="video-help-text">Pega el enlace de YouTube, Vimeo u otra plataforma</span>
               </div>
               <div className="modal-actions">
                 <button className="btn-cancelar" onClick={() => setModalPregunta(null)}>

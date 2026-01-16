@@ -3545,6 +3545,82 @@ body {
   transform: scale(1.02);
 }
 
+/* Estilos para campo de video */
+.video-input-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  transition: border-color 0.2s;
+}
+
+.video-input-container:focus-within {
+  border-color: #075e54;
+  background-color: #fff;
+}
+
+.video-input-icon {
+  width: 24px;
+  height: 24px;
+  color: #ff0000;
+  flex-shrink: 0;
+}
+
+.video-url-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  outline: none;
+  color: #333;
+}
+
+.video-url-input::placeholder {
+  color: #999;
+}
+
+.video-help-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #757575;
+}
+
+/* Video en la card de pregunta */
+.pregunta-video {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background-color: #fff3e0;
+  border-radius: 8px;
+  border: 1px solid #ffcc80;
+}
+
+.pregunta-video svg {
+  width: 20px;
+  height: 20px;
+  color: #ff0000;
+  flex-shrink: 0;
+}
+
+.pregunta-video a {
+  color: #e65100;
+  font-size: 13px;
+  text-decoration: none;
+  word-break: break-all;
+  transition: color 0.2s;
+}
+
+.pregunta-video a:hover {
+  color: #bf360c;
+  text-decoration: underline;
+}
+
 /* Responsive para necesidades */
 @media (max-width: 900px) {
   .necesidades-tabs-movil {
