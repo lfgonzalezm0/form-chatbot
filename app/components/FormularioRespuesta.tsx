@@ -14,7 +14,7 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
   const [opcionSeleccionada, setOpcionSeleccionada] = useState<Opcion>(null);
   const [respuesta, setRespuesta] = useState("");
   const [imagen, setImagen] = useState<string | null>(null);
-  const [video, setVideo] = useState("");
+  const [video, setVideo] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState("");
@@ -43,6 +43,30 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
     setImagen(null);
   };
 
+  const manejarCambioVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = e.target.files?.[0];
+    if (archivo) {
+      if (archivo.size > 50 * 1024 * 1024) {
+        setError("El video no debe superar 50MB");
+        return;
+      }
+      if (!archivo.type.startsWith("video/")) {
+        setError("Solo se permiten archivos de video");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setVideo(reader.result as string);
+        setError("");
+      };
+      reader.readAsDataURL(archivo);
+    }
+  };
+
+  const quitarVideo = () => {
+    setVideo(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -67,7 +91,7 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
         accion: opcionSeleccionada,
         respuesta: opcionSeleccionada === "responder" ? respuesta.trim() : null,
         imagen: opcionSeleccionada === "responder" ? imagen : null,
-        video: opcionSeleccionada === "responder" && video.trim() ? video.trim() : null,
+        video: opcionSeleccionada === "responder" ? video : null,
       };
 
       const res = await fetch("/api/enviar-respuesta", {
@@ -232,16 +256,29 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
               </svg>
-              <span>Enlace de Video (opcional)</span>
+              <span>Video (opcional, max 50MB)</span>
             </div>
-            <input
-              type="url"
-              value={video}
-              onChange={(e) => setVideo(e.target.value)}
-              disabled={enviando}
-              className="chat-input-url"
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
+            {video ? (
+              <div className="adjunto-preview adjunto-preview-video">
+                <video src={video} controls />
+                <button type="button" className="btn-quitar-adjunto" onClick={quitarVideo}>
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
+                  Quitar
+                </button>
+              </div>
+            ) : (
+              <label className="adjunto-upload">
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={manejarCambioVideo}
+                  disabled={enviando}
+                />
+                <span>Haz clic para seleccionar video</span>
+              </label>
+            )}
           </div>
         </>
       )}

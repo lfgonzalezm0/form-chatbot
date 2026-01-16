@@ -784,6 +784,13 @@ body {
   border: 1px solid #e0e0e0;
 }
 
+.adjunto-preview-video video {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
 .btn-quitar-adjunto {
   display: flex;
   align-items: center;
@@ -1299,6 +1306,105 @@ body {
   width: 18px;
   height: 18px;
   color: #667781;
+}
+
+/* Celda de acciones */
+.celda-acciones {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Boton eliminar */
+.btn-eliminar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #fee2e2;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-eliminar:hover {
+  background-color: #fecaca;
+}
+
+.btn-eliminar svg {
+  width: 18px;
+  height: 18px;
+  color: #dc2626;
+}
+
+/* Modal eliminar registro */
+.modal-eliminar {
+  max-width: 400px;
+}
+
+.modal-eliminar h2 {
+  color: #dc2626;
+  margin-bottom: 16px;
+}
+
+.modal-eliminar p {
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.modal-warning {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.modal-acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.btn-cancelar {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  color: #374151;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.btn-cancelar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-confirmar-eliminar {
+  padding: 10px 20px;
+  border: none;
+  background-color: #dc2626;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-confirmar-eliminar:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.btn-confirmar-eliminar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Fila de detalle expandido */

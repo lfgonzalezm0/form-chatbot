@@ -40,13 +40,16 @@ export async function POST(req: NextRequest) {
     // Generar urlimagen si hay imagen
     const urlimagen = imagen ? `${APP_URL}/api/imagen-respuesta/${guid}` : null;
 
+    // Generar videourl si hay video (base64)
+    const videourl = video && video.startsWith("data:") ? `${APP_URL}/api/video-respuesta/${guid}` : null;
+
     // Preparar payload para n8n
     const n8nPayload = {
       guid,
       accion,
       respuesta: accion === "responder" ? respuesta : null,
       urlimagen,
-      video: accion === "responder" ? video : null,
+      videourl,
     };
 
     // Hacer POST al webhook de n8n
@@ -89,7 +92,8 @@ export async function POST(req: NextRequest) {
           respuesta = $3,
           imagen = $4,
           video = $5,
-          urlimagen = $6
+          urlimagen = $6,
+          videourl = $7
       WHERE guid = $1
       `,
       [
@@ -98,7 +102,8 @@ export async function POST(req: NextRequest) {
         accion === "responder" ? respuesta : null,
         accion === "responder" ? imagen : null,
         accion === "responder" ? video : null,
-        urlimagen
+        urlimagen,
+        videourl
       ]
     );
 

@@ -54,6 +54,10 @@ export default function RegistrosPage() {
   // Registro expandido para ver detalles
   const [registroExpandido, setRegistroExpandido] = useState<number | null>(null);
 
+  // Modal de confirmacion para eliminar
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState<Registro | null>(null);
+  const [eliminando, setEliminando] = useState(false);
+
   useEffect(() => {
     fetchRegistros();
   }, []);
@@ -140,6 +144,31 @@ export default function RegistrosPage() {
     setFiltroBloqueado("todos");
     setFiltroFechaDesde("");
     setFiltroFechaHasta("");
+  };
+
+  const eliminarRegistro = async () => {
+    if (!confirmandoEliminar) return;
+
+    try {
+      setEliminando(true);
+      const res = await fetch(`/api/registros/${confirmandoEliminar.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Error al eliminar");
+      }
+
+      // Actualizar lista local
+      setRegistros(registros.filter((r) => r.id !== confirmandoEliminar.id));
+      setConfirmandoEliminar(null);
+    } catch (err) {
+      console.error(err);
+      alert("Error al eliminar el registro");
+    } finally {
+      setEliminando(false);
+    }
   };
 
   // Obtener valores unicos para los selects
@@ -335,7 +364,7 @@ export default function RegistrosPage() {
                     <td className="celda-texto" title={registro.respuesta || ""}>
                       {truncarTexto(registro.respuesta, 40)}
                     </td>
-                    <td>
+                    <td className="celda-acciones">
                       <button
                         className="btn-ver-detalle"
                         onClick={() => setRegistroExpandido(registroExpandido === registro.id ? null : registro.id)}
@@ -343,6 +372,15 @@ export default function RegistrosPage() {
                       >
                         <svg viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                        </svg>
+                      </button>
+                      <button
+                        className="btn-eliminar"
+                        onClick={() => setConfirmandoEliminar(registro)}
+                        title="Eliminar registro"
+                      >
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                         </svg>
                       </button>
                     </td>
@@ -383,6 +421,35 @@ export default function RegistrosPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal de confirmacion para eliminar */}
+      {confirmandoEliminar && (
+        <div className="modal-overlay" onClick={() => !eliminando && setConfirmandoEliminar(null)}>
+          <div className="modal-content modal-eliminar" onClick={(e) => e.stopPropagation()}>
+            <h2>Eliminar registro</h2>
+            <p>
+              ¿Está seguro que desea eliminar el registro <strong>#{confirmandoEliminar.id}</strong>?
+            </p>
+            <p className="modal-warning">Esta acción no se puede deshacer.</p>
+            <div className="modal-acciones">
+              <button
+                className="btn-cancelar"
+                onClick={() => setConfirmandoEliminar(null)}
+                disabled={eliminando}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn-confirmar-eliminar"
+                onClick={eliminarRegistro}
+                disabled={eliminando}
+              >
+                {eliminando ? "Eliminando..." : "Eliminar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
