@@ -24,6 +24,7 @@ export async function GET() {
       SELECT
         c.guid,
         c.telefonocliente,
+        c.telefonocaso,
         c.contexto,
         c.pregunta,
         c.estado,
@@ -33,14 +34,14 @@ export async function GET() {
         c.creado,
         u.nombre as nombreusuario
       FROM consultanecesidad c
-      LEFT JOIN usuariossystem u ON c.telefonocliente = u.telefono
+      LEFT JOIN usuariossystem u ON c.telefonocaso = u.telefonocaso
     `;
 
     const params: string[] = [];
 
-    // Si no es admin, filtrar por teléfono del usuario
+    // Si no es admin, filtrar por telefonocaso del usuario
     if (!esAdmin && session.telefono) {
-      query += ` WHERE c.telefonocliente = $1`;
+      query += ` WHERE c.telefonocaso = $1`;
       params.push(session.telefono);
     }
 

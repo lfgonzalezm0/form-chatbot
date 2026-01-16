@@ -26,6 +26,7 @@ export async function GET() {
         id,
         nombre,
         telefono,
+        telefonocaso,
         cuenta,
         contrasena,
         proceso,
@@ -36,9 +37,9 @@ export async function GET() {
 
     const params: string[] = [];
 
-    // Si no es admin, filtrar solo su propio registro
+    // Si no es admin, filtrar solo su propio registro por telefonocaso
     if (!esAdmin && session.telefono) {
-      query += ` WHERE telefono = $1`;
+      query += ` WHERE telefonocaso = $1`;
       params.push(session.telefono);
     }
 

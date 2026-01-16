@@ -41,8 +41,8 @@ export async function GET(
 
     const usuario = result.rows[0];
 
-    // Si no es admin, verificar que sea su propio registro
-    if (!esAdmin && session.telefono !== usuario.telefono) {
+    // Si no es admin, verificar que sea su propio registro por telefonocaso
+    if (!esAdmin && session.telefono !== usuario.telefonocaso) {
       return NextResponse.json(
         { error: "No tiene acceso a este recurso" },
         { status: 403 }
