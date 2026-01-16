@@ -3,10 +3,12 @@
 import { Suspense, useState, useCallback } from "react";
 import Sidebar from "./Sidebar";
 import ConversacionDetalle from "./ConversacionDetalle";
+import { useAuth } from "./AuthProvider";
 
 export type Seccion = "Necesidad" | "Acción";
 
 export default function AppLayout() {
+  const { usuario, cargando } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [seccionActiva, setSeccionActiva] = useState<Seccion>("Necesidad");
   const [guidSeleccionado, setGuidSeleccionado] = useState<string | null>(null);
@@ -20,6 +22,21 @@ export default function AppLayout() {
   const handleConversacionActualizada = useCallback(() => {
     setRefreshKey((k) => k + 1);
   }, []);
+
+  // Mostrar carga mientras se verifica la sesión
+  if (cargando) {
+    return (
+      <div className="app-loading">
+        <div className="loading-spinner"></div>
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
+  // Si no hay usuario, no renderizar nada (el AuthProvider redirigirá)
+  if (!usuario) {
+    return null;
+  }
 
   return (
     <div className="app-container">
