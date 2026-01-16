@@ -171,7 +171,7 @@ export default function Sidebar({
     <>
       {/* Header del sidebar */}
       <div className="sidebar-header">
-        <h2>Conversaciones</h2>
+        <h2>Gestión de ChatBot</h2>
         <div className="sidebar-header-actions">
           <Link href="/usuarios" className="usuarios-link-btn" title="Gestion de usuarios">
             <svg viewBox="0 0 24 24" fill="currentColor">
