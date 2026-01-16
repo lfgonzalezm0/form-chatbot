@@ -85,7 +85,7 @@ export default function Sidebar({
   const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
-  const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">("todos");
+  const [filtro, setFiltro] = useState<"todos" | "pendiente" | "cerrado">("pendiente");
 
   const fetchConversaciones = async () => {
     try {
@@ -111,6 +111,11 @@ export default function Sidebar({
       fetchConversaciones();
     }
   }, [refreshKey]);
+
+  // Resetear filtro a "pendiente" cuando cambie la seccion
+  useEffect(() => {
+    setFiltro("pendiente");
+  }, [seccionActiva]);
 
   // Filtrar por seccion (paso) primero, luego por estado y busqueda
   const conversacionesFiltradas = conversaciones.filter((c) => {
