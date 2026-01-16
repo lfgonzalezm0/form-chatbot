@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { Seccion } from "./AppLayout";
 
 interface SidebarProps {
@@ -171,6 +172,11 @@ export default function Sidebar({
       <div className="sidebar-header">
         <h2>Conversaciones</h2>
         <div className="sidebar-header-actions">
+          <Link href="/registros" className="registros-link-btn" title="Ver todos los registros">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+            </svg>
+          </Link>
           <button className="refresh-btn" onClick={fetchConversaciones} title="Actualizar">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
