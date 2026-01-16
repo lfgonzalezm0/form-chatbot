@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ guid: string }> }
 ) {
   const { guid } = await params;
@@ -17,8 +18,21 @@ export async function GET(
   }
 
   try {
-    const result = await pool.query(
-      `
+    // Obtener sesión del usuario
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      );
+    }
+
+    const session = JSON.parse(sessionCookie.value);
+    const esAdmin = session.tipousuario === "Administrador";
+
+    let query = `
       SELECT
         c.guid,
         c.telefonocliente,
@@ -34,10 +48,19 @@ export async function GET(
       FROM consultanecesidad c
       LEFT JOIN usuariossystem u ON c.telefonocliente = u.telefono
       WHERE c.guid = $1
-      LIMIT 1
-      `,
-      [guid]
-    );
+    `;
+
+    const queryParams: string[] = [guid];
+
+    // Si no es admin, verificar que la conversación pertenezca al usuario
+    if (!esAdmin && session.telefono) {
+      query += ` AND c.telefonocliente = $2`;
+      queryParams.push(session.telefono);
+    }
+
+    query += ` LIMIT 1`;
+
+    const result = await pool.query(query, queryParams);
 
     if (result.rows.length === 0) {
       return NextResponse.json(

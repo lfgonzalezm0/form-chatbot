@@ -1,16 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 // GET: Obtener un usuario por ID
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
 
   try {
+    // Verificar sesión
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      );
+    }
+
+    const session = JSON.parse(sessionCookie.value);
+    const esAdmin = session.tipousuario === "Administrador";
+
+    // Obtener usuario
     const result = await pool.query(
       `SELECT * FROM usuariossystem WHERE id = $1`,
       [id]
@@ -23,7 +39,17 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(result.rows[0]);
+    const usuario = result.rows[0];
+
+    // Si no es admin, verificar que sea su propio registro
+    if (!esAdmin && session.telefono !== usuario.telefono) {
+      return NextResponse.json(
+        { error: "No tiene acceso a este recurso" },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json(usuario);
   } catch (error) {
     console.error("Error al obtener usuario:", error);
     return NextResponse.json(
@@ -33,7 +59,7 @@ export async function GET(
   }
 }
 
-// PUT: Actualizar un usuario
+// PUT: Actualizar un usuario (solo admin puede editar cualquiera)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -41,6 +67,28 @@ export async function PUT(
   const { id } = await params;
 
   try {
+    // Verificar sesión
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      );
+    }
+
+    const session = JSON.parse(sessionCookie.value);
+    const esAdmin = session.tipousuario === "Administrador";
+
+    // Solo admin puede editar usuarios
+    if (!esAdmin) {
+      return NextResponse.json(
+        { error: "No tiene permisos para editar usuarios" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { nombre, telefono, cuenta, contrasena, proceso, aprobar, asignacion } = body;
 
@@ -81,14 +129,34 @@ export async function PUT(
   }
 }
 
-// DELETE: Eliminar un usuario
+// DELETE: Eliminar un usuario (solo admin)
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
 
   try {
+    // Verificar sesión y que sea admin
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      );
+    }
+
+    const session = JSON.parse(sessionCookie.value);
+
+    if (session.tipousuario !== "Administrador") {
+      return NextResponse.json(
+        { error: "No tiene permisos para eliminar usuarios" },
+        { status: 403 }
+      );
+    }
+
     const result = await pool.query(
       `DELETE FROM usuariossystem WHERE id = $1 RETURNING id`,
       [id]

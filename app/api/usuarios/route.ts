@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 // GET: Obtener todos los usuarios
 export async function GET() {
   try {
-    const result = await pool.query(
-      `
+    // Obtener sesión del usuario
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      );
+    }
+
+    const session = JSON.parse(sessionCookie.value);
+    const esAdmin = session.tipousuario === "Administrador";
+
+    let query = `
       SELECT
         id,
         nombre,
@@ -18,9 +32,19 @@ export async function GET() {
         aprobar,
         asignacion
       FROM usuariossystem
-      ORDER BY id DESC
-      `
-    );
+    `;
+
+    const params: string[] = [];
+
+    // Si no es admin, filtrar solo su propio registro
+    if (!esAdmin && session.telefono) {
+      query += ` WHERE telefono = $1`;
+      params.push(session.telefono);
+    }
+
+    query += ` ORDER BY id DESC`;
+
+    const result = await pool.query(query, params);
 
     return NextResponse.json(result.rows);
   } catch (error) {
@@ -32,9 +56,29 @@ export async function GET() {
   }
 }
 
-// PUT: Actualizar masivamente aprobar o asignacion
+// PUT: Actualizar masivamente aprobar o asignacion (solo admin)
 export async function PUT(req: NextRequest) {
   try {
+    // Verificar que sea administrador
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 }
+      );
+    }
+
+    const session = JSON.parse(sessionCookie.value);
+
+    if (session.tipousuario !== "Administrador") {
+      return NextResponse.json(
+        { error: "No tiene permisos para realizar esta acción" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { ids, campo, valor } = body;
 
