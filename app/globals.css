@@ -3730,6 +3730,172 @@ body {
   height: 16px;
 }
 
+/* Video upload en modal de necesidades */
+.video-upload-container {
+  margin-top: 8px;
+}
+
+.video-upload-label {
+  display: block;
+  cursor: pointer;
+}
+
+.video-input-hidden {
+  display: none;
+}
+
+.video-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+  border: 2px dashed #c8e6c9;
+  border-radius: 12px;
+  background-color: #f1f8e9;
+  transition: all 0.2s;
+}
+
+.video-upload-placeholder:hover {
+  border-color: #25d366;
+  background-color: #e8f5e9;
+}
+
+.video-upload-placeholder svg {
+  width: 48px;
+  height: 48px;
+  color: #4caf50;
+}
+
+.video-upload-placeholder span {
+  color: #388e3c;
+  font-size: 14px;
+}
+
+.video-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.video-preview {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+}
+
+.btn-quitar-video {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-quitar-video:hover {
+  background-color: #ffcdd2;
+  border-color: #e57373;
+}
+
+.btn-quitar-video svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Video preview en tarjeta de pregunta */
+.video-preview-card {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.videourl-container {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.videourl-label {
+  display: block;
+  color: #667781;
+  margin-bottom: 4px;
+}
+
+.videourl-copy {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.videourl-copy input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-family: monospace;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+.videourl-copy button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.videourl-copy button:hover {
+  background-color: #f5f5f5;
+  border-color: #bdbdbd;
+}
+
+.videourl-copy button svg {
+  width: 16px;
+  height: 16px;
+  color: #667781;
+}
+
+/* Boton eliminar adjunto en tarjeta de pregunta */
+.btn-eliminar-adjunto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  margin-top: 10px;
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-eliminar-adjunto:hover {
+  background-color: #ffcdd2;
+  border-color: #e57373;
+}
+
+.btn-eliminar-adjunto svg {
+  width: 14px;
+  height: 14px;
+}
+
 /* Imagen en la card de pregunta */
 .pregunta-imagen {
   margin-top: 12px;

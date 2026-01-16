@@ -20,9 +20,8 @@ interface Pregunta {
   pregunta: string | null;
   respuesta: string | null;
   variante: string | null;
-  imagen: string | null;
-  video: string | null;
   urlimagen: string | null;
+  videourl: string | null;
 }
 
 const CATEGORIAS = [
@@ -73,6 +72,9 @@ export default function NecesidadesPage() {
   const [variantes, setVariantes] = useState<string[]>([]);
   const [nuevaVariante, setNuevaVariante] = useState("");
   const [imagenPreview, setImagenPreview] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [imagenFile, setImagenFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
 
   // Necesidad en edicion
   const [necesidadEditando, setNecesidadEditando] = useState<Necesidad | null>(null);
@@ -272,6 +274,9 @@ export default function NecesidadesPage() {
     setVariantes([]);
     setNuevaVariante("");
     setImagenPreview(null);
+    setVideoPreview(null);
+    setImagenFile(null);
+    setVideoFile(null);
     setPreguntaEditando(null);
     setModalPregunta("crear");
   };
@@ -280,7 +285,11 @@ export default function NecesidadesPage() {
     setFormPregunta({ ...p });
     setVariantes(p.variante ? p.variante.split(";").filter(Boolean) : []);
     setNuevaVariante("");
-    setImagenPreview(p.imagen || null);
+    // Para edicion, usamos urlimagen/videourl como preview si existen
+    setImagenPreview(p.urlimagen || null);
+    setVideoPreview(p.videourl || null);
+    setImagenFile(null);
+    setVideoFile(null);
     setPreguntaEditando(p);
     setModalPregunta("editar");
   };
@@ -300,19 +309,59 @@ export default function NecesidadesPage() {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setImagenPreview(base64);
-        setFormPregunta({ ...formPregunta, imagen: base64 });
-      };
-      reader.readAsDataURL(archivo);
+      // Limpiar preview anterior si existe
+      if (imagenPreview && imagenPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagenPreview);
+      }
+
+      setImagenFile(archivo);
+      setImagenPreview(URL.createObjectURL(archivo));
+      setError(null);
     }
   };
 
   const quitarImagen = () => {
+    if (imagenPreview && imagenPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(imagenPreview);
+    }
     setImagenPreview(null);
-    setFormPregunta({ ...formPregunta, imagen: null });
+    setImagenFile(null);
+    setFormPregunta({ ...formPregunta, urlimagen: null });
+  };
+
+  const manejarCambioVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = e.target.files?.[0];
+    if (archivo) {
+      // Validar tamaño (max 50MB)
+      if (archivo.size > 50 * 1024 * 1024) {
+        setError("El video no debe superar 50MB");
+        return;
+      }
+
+      // Validar tipo
+      if (!archivo.type.startsWith("video/")) {
+        setError("Solo se permiten archivos de video");
+        return;
+      }
+
+      // Limpiar preview anterior si existe
+      if (videoPreview && videoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(videoPreview);
+      }
+
+      setVideoFile(archivo);
+      setVideoPreview(URL.createObjectURL(archivo));
+      setError(null);
+    }
+  };
+
+  const quitarVideo = () => {
+    if (videoPreview && videoPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(videoPreview);
+    }
+    setVideoPreview(null);
+    setVideoFile(null);
+    setFormPregunta({ ...formPregunta, videourl: null });
   };
 
   const agregarVariante = () => {
@@ -326,6 +375,25 @@ export default function NecesidadesPage() {
     setVariantes(variantes.filter((_, i) => i !== index));
   };
 
+  // Funcion para subir archivo al servidor
+  const subirArchivo = async (file: File, tipo: "imagen" | "video"): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("tipo", tipo);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Error al subir ${tipo}`);
+    }
+
+    const data = await res.json();
+    return data.url;
+  };
+
   const guardarPregunta = async () => {
     if (!formPregunta.categoria || !formPregunta.necesidad || !formPregunta.pregunta) {
       setError("Categoria, necesidad y pregunta son requeridos");
@@ -335,13 +403,33 @@ export default function NecesidadesPage() {
     setGuardando(true);
     setError(null);
 
-    const datosGuardar = {
-      ...formPregunta,
-      variante: variantes.length > 0 ? variantes.join(";") : null,
-      imagen: imagenPreview,
-    };
-
     try {
+      let imagenUrl = formPregunta.urlimagen || null;
+      let videoUrl = formPregunta.videourl || null;
+
+      // Subir imagen si hay un archivo nuevo
+      if (imagenFile) {
+        imagenUrl = await subirArchivo(imagenFile, "imagen");
+      } else if (!imagenPreview) {
+        // Si no hay preview, limpiar la URL
+        imagenUrl = null;
+      }
+
+      // Subir video si hay un archivo nuevo
+      if (videoFile) {
+        videoUrl = await subirArchivo(videoFile, "video");
+      } else if (!videoPreview) {
+        // Si no hay preview, limpiar la URL
+        videoUrl = null;
+      }
+
+      const datosGuardar = {
+        ...formPregunta,
+        variante: variantes.length > 0 ? variantes.join(";") : null,
+        imagenUrl,
+        videoUrl,
+      };
+
       if (modalPregunta === "crear") {
         const res = await fetch("/api/preguntas", {
           method: "POST",
@@ -359,9 +447,10 @@ export default function NecesidadesPage() {
           body: JSON.stringify(datosGuardar),
         });
         if (!res.ok) throw new Error("Error al actualizar pregunta");
+        const actualizada = await res.json();
         setPreguntas((prev) =>
           prev.map((p) =>
-            p.id === preguntaEditando.id ? { ...p, ...datosGuardar } : p
+            p.id === preguntaEditando.id ? actualizada : p
           )
         );
         mostrarMensaje("Pregunta actualizada correctamente");
@@ -388,6 +477,42 @@ export default function NecesidadesPage() {
     } finally {
       setGuardando(false);
       setConfirmandoEliminar(null);
+    }
+  };
+
+  // Eliminar solo imagen o video de una pregunta
+  const eliminarAdjunto = async (preguntaId: number, tipo: "imagen" | "video") => {
+    try {
+      const pregunta = preguntas.find((p) => p.id === preguntaId);
+      if (!pregunta) return;
+
+      // Preparar datos con la URL correspondiente en null
+      const datosActualizar = {
+        ...pregunta,
+        imagenUrl: tipo === "imagen" ? null : pregunta.urlimagen,
+        videoUrl: tipo === "video" ? null : pregunta.videourl,
+      };
+
+      const res = await fetch(`/api/preguntas/${preguntaId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosActualizar),
+      });
+
+      if (!res.ok) throw new Error(`Error al eliminar ${tipo}`);
+
+      setPreguntas((prev) =>
+        prev.map((p) =>
+          p.id === preguntaId
+            ? { ...p, urlimagen: tipo === "imagen" ? null : p.urlimagen, videourl: tipo === "video" ? null : p.videourl }
+            : p
+        )
+      );
+
+      mostrarMensaje(`${tipo === "imagen" ? "Imagen" : "Video"} eliminado correctamente`);
+    } catch (err) {
+      console.error(err);
+      mostrarMensaje(`Error al eliminar ${tipo}`);
     }
   };
 
@@ -688,38 +813,68 @@ export default function NecesidadesPage() {
                             </div>
                           </div>
                         )}
-                        {p.imagen && (
+                        {p.urlimagen && (
                           <div className="pregunta-imagen">
-                            <img src={p.imagen} alt="Imagen adjunta" />
-                            {p.urlimagen && (
-                              <div className="urlimagen-container">
-                                <span className="urlimagen-label">URL para WhatsApp:</span>
-                                <div className="urlimagen-copy">
-                                  <input type="text" value={p.urlimagen} readOnly />
-                                  <button
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(p.urlimagen || "");
-                                      mostrarMensaje("URL copiada al portapapeles");
-                                    }}
-                                    title="Copiar URL"
-                                  >
-                                    <svg viewBox="0 0 24 24" fill="currentColor">
-                                      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                                    </svg>
-                                  </button>
-                                </div>
+                            <img src={p.urlimagen} alt="Imagen adjunta" />
+                            <div className="urlimagen-container">
+                              <span className="urlimagen-label">URL para WhatsApp:</span>
+                              <div className="urlimagen-copy">
+                                <input type="text" value={p.urlimagen} readOnly />
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(p.urlimagen || "");
+                                    mostrarMensaje("URL copiada al portapapeles");
+                                  }}
+                                  title="Copiar URL"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                  </svg>
+                                </button>
                               </div>
-                            )}
+                            </div>
+                            <button
+                              className="btn-eliminar-adjunto"
+                              onClick={() => eliminarAdjunto(p.id, "imagen")}
+                              title="Eliminar imagen"
+                            >
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                              </svg>
+                              Eliminar imagen
+                            </button>
                           </div>
                         )}
-                        {p.video && (
+                        {p.videourl && (
                           <div className="pregunta-video">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                            </svg>
-                            <a href={p.video} target="_blank" rel="noopener noreferrer">
-                              {p.video}
-                            </a>
+                            <video src={p.videourl} controls className="video-preview-card" />
+                            <div className="videourl-container">
+                              <span className="videourl-label">URL para WhatsApp:</span>
+                              <div className="videourl-copy">
+                                <input type="text" value={p.videourl} readOnly />
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(p.videourl || "");
+                                    mostrarMensaje("URL copiada al portapapeles");
+                                  }}
+                                  title="Copiar URL"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                            <button
+                              className="btn-eliminar-adjunto"
+                              onClick={() => eliminarAdjunto(p.id, "video")}
+                              title="Eliminar video"
+                            >
+                              <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                              </svg>
+                              Eliminar video
+                            </button>
                           </div>
                         )}
                       </div>
@@ -952,20 +1107,35 @@ export default function NecesidadesPage() {
                 </div>
               </div>
               <div className="form-field">
-                <label>Enlace de Video (opcional)</label>
-                <div className="video-input-container">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="video-input-icon">
-                    <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                  </svg>
-                  <input
-                    type="url"
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    value={formPregunta.video || ""}
-                    onChange={(e) => setFormPregunta({ ...formPregunta, video: e.target.value || null })}
-                    className="video-url-input"
-                  />
+                <label>Video (opcional, max 50MB)</label>
+                <div className="video-upload-container">
+                  {videoPreview ? (
+                    <div className="video-preview-container">
+                      <video src={videoPreview} controls className="video-preview" />
+                      <button className="btn-quitar-video" onClick={quitarVideo} type="button">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                        Quitar video
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="video-upload-label">
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={manejarCambioVideo}
+                        className="video-input-hidden"
+                      />
+                      <div className="video-upload-placeholder">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                        </svg>
+                        <span>Haz clic para seleccionar video</span>
+                      </div>
+                    </label>
+                  )}
                 </div>
-                <span className="video-help-text">Pega el enlace de YouTube, Vimeo u otra plataforma</span>
               </div>
               <div className="modal-actions">
                 <button className="btn-cancelar" onClick={() => setModalPregunta(null)}>

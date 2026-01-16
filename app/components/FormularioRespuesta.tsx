@@ -13,11 +13,17 @@ type Opcion = "bloquear" | "ignorar" | "responder" | null;
 export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) {
   const [opcionSeleccionada, setOpcionSeleccionada] = useState<Opcion>(null);
   const [respuesta, setRespuesta] = useState("");
-  const [imagen, setImagen] = useState<string | null>(null);
-  const [video, setVideo] = useState<string | null>(null);
+
+  // Estados para archivos
+  const [imagenFile, setImagenFile] = useState<File | null>(null);
+  const [imagenPreview, setImagenPreview] = useState<string | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState("");
+  const [progreso, setProgreso] = useState("");
 
   const manejarCambioImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = e.target.files?.[0];
@@ -30,17 +36,18 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
         setError("Solo se permiten archivos de imagen");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagen(reader.result as string);
-        setError("");
-      };
-      reader.readAsDataURL(archivo);
+      setImagenFile(archivo);
+      setImagenPreview(URL.createObjectURL(archivo));
+      setError("");
     }
   };
 
   const quitarImagen = () => {
-    setImagen(null);
+    if (imagenPreview) {
+      URL.revokeObjectURL(imagenPreview);
+    }
+    setImagenFile(null);
+    setImagenPreview(null);
   };
 
   const manejarCambioVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,17 +61,37 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
         setError("Solo se permiten archivos de video");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setVideo(reader.result as string);
-        setError("");
-      };
-      reader.readAsDataURL(archivo);
+      setVideoFile(archivo);
+      setVideoPreview(URL.createObjectURL(archivo));
+      setError("");
     }
   };
 
   const quitarVideo = () => {
-    setVideo(null);
+    if (videoPreview) {
+      URL.revokeObjectURL(videoPreview);
+    }
+    setVideoFile(null);
+    setVideoPreview(null);
+  };
+
+  // Funcion para subir archivo al servidor
+  const subirArchivo = async (file: File, tipo: "imagen" | "video"): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("tipo", tipo);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Error al subir ${tipo}`);
+    }
+
+    const data = await res.json();
+    return data.url;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,13 +112,30 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
     setError("");
 
     try {
+      let imagenUrl: string | null = null;
+      let videoUrl: string | null = null;
+
+      // Subir imagen si existe
+      if (opcionSeleccionada === "responder" && imagenFile) {
+        setProgreso("Subiendo imagen...");
+        imagenUrl = await subirArchivo(imagenFile, "imagen");
+      }
+
+      // Subir video si existe
+      if (opcionSeleccionada === "responder" && videoFile) {
+        setProgreso("Subiendo video...");
+        videoUrl = await subirArchivo(videoFile, "video");
+      }
+
+      setProgreso("Enviando respuesta...");
+
       const payload = {
         guid,
         enlace,
         accion: opcionSeleccionada,
         respuesta: opcionSeleccionada === "responder" ? respuesta.trim() : null,
-        imagen: opcionSeleccionada === "responder" ? imagen : null,
-        video: opcionSeleccionada === "responder" ? video : null,
+        imagenUrl: opcionSeleccionada === "responder" ? imagenUrl : null,
+        videoUrl: opcionSeleccionada === "responder" ? videoUrl : null,
       };
 
       const res = await fetch("/api/enviar-respuesta", {
@@ -115,6 +159,7 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
       setError("No se pudo enviar. Intenta nuevamente.");
     } finally {
       setEnviando(false);
+      setProgreso("");
     }
   };
 
@@ -227,9 +272,9 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
               </svg>
               <span>Imagen (opcional, max 5MB)</span>
             </div>
-            {imagen ? (
+            {imagenPreview ? (
               <div className="adjunto-preview">
-                <img src={imagen} alt="Preview" />
+                <img src={imagenPreview} alt="Preview" />
                 <button type="button" className="btn-quitar-adjunto" onClick={quitarImagen}>
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
@@ -258,9 +303,9 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
               </svg>
               <span>Video (opcional, max 50MB)</span>
             </div>
-            {video ? (
+            {videoPreview ? (
               <div className="adjunto-preview adjunto-preview-video">
-                <video src={video} controls />
+                <video src={videoPreview} controls />
                 <button type="button" className="btn-quitar-adjunto" onClick={quitarVideo}>
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
@@ -281,6 +326,13 @@ export default function FormularioRespuesta({ guid, enlace, onEnviado }: Props) 
             )}
           </div>
         </>
+      )}
+
+      {/* Mensaje de progreso */}
+      {progreso && (
+        <p className="progreso-mensaje" style={{ textAlign: "center", color: "#075e54", fontSize: "13px", margin: "8px 0" }}>
+          {progreso}
+        </p>
       )}
 
       {/* Mensaje de error */}

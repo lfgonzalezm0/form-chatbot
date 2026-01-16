@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 
-// URL base de la aplicación
-const APP_URL = "https://form-chatbot-production.up.railway.app";
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { enlace, accion, respuesta, guid, imagen, video } = body;
+    const { enlace, accion, respuesta, guid, imagenUrl, videoUrl } = body;
 
     if (!enlace || !accion || !guid) {
       return NextResponse.json(
@@ -37,11 +34,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generar urlimagen si hay imagen
-    const urlimagen = imagen ? `${APP_URL}/api/imagen-respuesta/${guid}` : null;
-
-    // Generar videourl si hay video (base64)
-    const videourl = video && video.startsWith("data:") ? `${APP_URL}/api/video-respuesta/${guid}` : null;
+    // Las URLs ya vienen directamente del upload
+    const urlimagen = accion === "responder" ? imagenUrl : null;
+    const videourl = accion === "responder" ? videoUrl : null;
 
     // Preparar payload para n8n
     const n8nPayload = {
@@ -83,25 +78,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Actualizar el estado y la respuesta en la base de datos
-    // Lo hacemos incluso si el webhook fallo con 409, para mantener consistencia
+    // Ya no guardamos base64, solo las URLs
     await pool.query(
       `
       UPDATE consultanecesidad
       SET estado = 'cerrado',
           accionadmin = $2,
           respuesta = $3,
-          imagen = $4,
-          video = $5,
-          urlimagen = $6,
-          videourl = $7
+          urlimagen = $4,
+          videourl = $5
       WHERE guid = $1
       `,
       [
         guid,
         accion,
         accion === "responder" ? respuesta : null,
-        accion === "responder" ? imagen : null,
-        accion === "responder" ? video : null,
         urlimagen,
         videourl
       ]
