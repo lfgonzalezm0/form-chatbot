@@ -68,6 +68,10 @@ export async function POST(request: Request) {
       );
     }
 
+    // Convertir valores vacios a null para evitar problemas con restricciones UNIQUE
+    const correoNormalizado = correo?.trim() || null;
+    const telefonoNormalizado = telefono?.trim() || null;
+
     // Verificar que el usuario no exista
     const existente = await pool.query(
       `SELECT id FROM cuentassystem WHERE usuario = $1`,
@@ -81,11 +85,41 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verificar que el correo no exista (si se proporciono uno)
+    if (correoNormalizado) {
+      const correoExistente = await pool.query(
+        `SELECT id FROM cuentassystem WHERE correo = $1`,
+        [correoNormalizado]
+      );
+
+      if (correoExistente.rows.length > 0) {
+        return NextResponse.json(
+          { error: "El correo electronico ya esta registrado" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Verificar que el telefono no exista (si se proporciono uno)
+    if (telefonoNormalizado) {
+      const telefonoExistente = await pool.query(
+        `SELECT id FROM cuentassystem WHERE telefono = $1`,
+        [telefonoNormalizado]
+      );
+
+      if (telefonoExistente.rows.length > 0) {
+        return NextResponse.json(
+          { error: "El telefono ya esta registrado" },
+          { status: 400 }
+        );
+      }
+    }
+
     const result = await pool.query(
       `INSERT INTO cuentassystem (nombre, tipousuario, usuario, contrasena, correo, telefono, estado)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, nombre, tipousuario, usuario, correo, telefono, estado`,
-      [nombre, tipousuario, usuario, contrasena, correo, telefono, estado || "activo"]
+      [nombre || null, tipousuario, usuario, contrasena, correoNormalizado, telefonoNormalizado, estado || "activo"]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });

@@ -78,6 +78,10 @@ export async function PUT(
     const body = await request.json();
     const { nombre, tipousuario, usuario, contrasena, correo, telefono, estado } = body;
 
+    // Normalizar valores vacios a null
+    const correoNormalizado = correo?.trim() || null;
+    const telefonoNormalizado = telefono?.trim() || null;
+
     // Verificar que la cuenta exista
     const existente = await pool.query(
       `SELECT id FROM cuentassystem WHERE id = $1`,
@@ -106,14 +110,44 @@ export async function PUT(
       }
     }
 
+    // Si se está cambiando el correo, verificar que no exista otro con ese correo
+    if (correoNormalizado) {
+      const correoDuplicado = await pool.query(
+        `SELECT id FROM cuentassystem WHERE correo = $1 AND id != $2`,
+        [correoNormalizado, id]
+      );
+
+      if (correoDuplicado.rows.length > 0) {
+        return NextResponse.json(
+          { error: "El correo electronico ya esta registrado" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Si se está cambiando el telefono, verificar que no exista otro con ese telefono
+    if (telefonoNormalizado) {
+      const telefonoDuplicado = await pool.query(
+        `SELECT id FROM cuentassystem WHERE telefono = $1 AND id != $2`,
+        [telefonoNormalizado, id]
+      );
+
+      if (telefonoDuplicado.rows.length > 0) {
+        return NextResponse.json(
+          { error: "El telefono ya esta registrado" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Construir query de actualización dinámicamente
     const updates: string[] = [];
-    const values: (string | number)[] = [];
+    const values: (string | number | null)[] = [];
     let paramCount = 1;
 
     if (nombre !== undefined) {
       updates.push(`nombre = $${paramCount++}`);
-      values.push(nombre);
+      values.push(nombre || null);
     }
     if (tipousuario !== undefined) {
       updates.push(`tipousuario = $${paramCount++}`);
@@ -129,11 +163,11 @@ export async function PUT(
     }
     if (correo !== undefined) {
       updates.push(`correo = $${paramCount++}`);
-      values.push(correo);
+      values.push(correoNormalizado);
     }
     if (telefono !== undefined) {
       updates.push(`telefono = $${paramCount++}`);
-      values.push(telefono);
+      values.push(telefonoNormalizado);
     }
     if (estado !== undefined) {
       updates.push(`estado = $${paramCount++}`);
