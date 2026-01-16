@@ -4,6 +4,9 @@ import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
+// URL base de la aplicación
+const APP_URL = "https://form-chatbot-production.up.railway.app";
+
 // GET: Obtener una pregunta por ID
 export async function GET(
   _request: Request,
@@ -94,6 +97,9 @@ export async function PUT(
     const body = await request.json();
     const { categoria, necesidad, pregunta, respuesta, variante, imagen, video } = body;
 
+    // Generar urlimagen si hay imagen, o null si se eliminó
+    const urlimagen = imagen ? `${APP_URL}/api/imagen/${id}` : null;
+
     const result = await pool.query(
       `UPDATE preguntassystem
        SET categoria = COALESCE($2, categoria),
@@ -102,10 +108,11 @@ export async function PUT(
            respuesta = COALESCE($5, respuesta),
            variante = COALESCE($6, variante),
            imagen = $7,
-           video = $8
+           video = $8,
+           urlimagen = $9
        WHERE id = $1
        RETURNING *`,
-      [id, categoria, necesidad, pregunta, respuesta, variante, imagen !== undefined ? imagen : null, video !== undefined ? video : null]
+      [id, categoria, necesidad, pregunta, respuesta, variante, imagen !== undefined ? imagen : null, video !== undefined ? video : null, urlimagen]
     );
 
     return NextResponse.json(result.rows[0]);

@@ -4,6 +4,9 @@ import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
+// URL base de la aplicación
+const APP_URL = "https://form-chatbot-production.up.railway.app";
+
 // GET: Obtener todas las preguntas (opcionalmente filtradas por necesidad)
 export async function GET(req: NextRequest) {
   try {
@@ -36,7 +39,8 @@ export async function GET(req: NextRequest) {
         respuesta,
         variante,
         imagen,
-        video
+        video,
+        urlimagen
       FROM preguntassystem
       WHERE 1=1
     `;
@@ -105,6 +109,7 @@ export async function POST(req: NextRequest) {
     // El telefonocaso siempre es el del usuario logueado
     const telefonocaso = session.telefono;
 
+    // Insertar el registro
     const result = await pool.query(
       `INSERT INTO preguntassystem (telefonocaso, categoria, necesidad, pregunta, respuesta, variante, imagen, video)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -112,7 +117,19 @@ export async function POST(req: NextRequest) {
       [telefonocaso, categoria, necesidad, pregunta, respuesta || null, variante || null, imagen || null, video || null]
     );
 
-    return NextResponse.json(result.rows[0], { status: 201 });
+    const nuevaPregunta = result.rows[0];
+
+    // Si hay imagen, generar y guardar la URL
+    if (imagen) {
+      const urlimagen = `${APP_URL}/api/imagen/${nuevaPregunta.id}`;
+      await pool.query(
+        `UPDATE preguntassystem SET urlimagen = $1 WHERE id = $2`,
+        [urlimagen, nuevaPregunta.id]
+      );
+      nuevaPregunta.urlimagen = urlimagen;
+    }
+
+    return NextResponse.json(nuevaPregunta, { status: 201 });
   } catch (error) {
     console.error("Error al crear pregunta:", error);
     return NextResponse.json(

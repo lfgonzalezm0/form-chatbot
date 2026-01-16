@@ -22,6 +22,7 @@ interface Pregunta {
   variante: string | null;
   imagen: string | null;
   video: string | null;
+  urlimagen: string | null;
 }
 
 const CATEGORIAS = [
@@ -690,6 +691,25 @@ export default function NecesidadesPage() {
                         {p.imagen && (
                           <div className="pregunta-imagen">
                             <img src={p.imagen} alt="Imagen adjunta" />
+                            {p.urlimagen && (
+                              <div className="urlimagen-container">
+                                <span className="urlimagen-label">URL para WhatsApp:</span>
+                                <div className="urlimagen-copy">
+                                  <input type="text" value={p.urlimagen} readOnly />
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(p.urlimagen || "");
+                                      mostrarMensaje("URL copiada al portapapeles");
+                                    }}
+                                    title="Copiar URL"
+                                  >
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                         {p.video && (

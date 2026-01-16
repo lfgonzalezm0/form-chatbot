@@ -3545,6 +3545,65 @@ body {
   transform: scale(1.02);
 }
 
+/* URL de imagen para WhatsApp */
+.urlimagen-container {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+  border: 1px solid #90caf9;
+}
+
+.urlimagen-label {
+  display: block;
+  font-size: 11px;
+  color: #1565c0;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.urlimagen-copy {
+  display: flex;
+  gap: 8px;
+}
+
+.urlimagen-copy input {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 12px;
+  border: 1px solid #90caf9;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #1976d2;
+  font-family: monospace;
+}
+
+.urlimagen-copy button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: #1976d2;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.urlimagen-copy button:hover {
+  background-color: #1565c0;
+}
+
+.urlimagen-copy button svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Estilos para campo de video */
 .video-input-container {
   display: flex;
