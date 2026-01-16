@@ -36,7 +36,7 @@ export async function GET(
       SELECT
         c.guid,
         c.telefonocliente,
-        c.telefonocaso,
+        c.telefonoempresa,
         c.contexto,
         c.pregunta,
         c.estado,
@@ -47,7 +47,7 @@ export async function GET(
         c.creado,
         u.nombre as nombreusuario
       FROM consultanecesidad c
-      LEFT JOIN usuariossystem u ON c.telefonocaso = u.telefonocaso
+      LEFT JOIN usuariossystem u ON c.telefonoempresa = u.telefonocaso
       WHERE c.guid = $1
     `;
 
@@ -55,7 +55,7 @@ export async function GET(
 
     // Si no es admin, verificar que la conversación pertenezca al usuario
     if (!esAdmin && session.telefono) {
-      query += ` AND c.telefonocaso = $2`;
+      query += ` AND c.telefonoempresa = $2`;
       queryParams.push(session.telefono);
     }
 

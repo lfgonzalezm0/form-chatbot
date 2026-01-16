@@ -25,7 +25,6 @@ export async function GET() {
         id,
         guid,
         telefonocliente,
-        telefonocaso,
         telefonoempresa,
         contexto,
         pregunta,
@@ -41,9 +40,9 @@ export async function GET() {
 
     const params: string[] = [];
 
-    // Si no es admin, filtrar por telefonocaso del usuario
+    // Si no es admin, filtrar por telefonoempresa del usuario
     if (!esAdmin && session.telefono) {
-      query += ` WHERE telefonocaso = $1`;
+      query += ` WHERE telefonoempresa = $1`;
       params.push(session.telefono);
     }
 
