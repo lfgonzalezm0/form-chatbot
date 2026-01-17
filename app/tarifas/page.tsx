@@ -357,7 +357,7 @@ export default function TarifasPage() {
       {/* Modal crear/editar */}
       {modalAbierto && (
         <div className="modal-overlay" onClick={() => setModalAbierto(false)}>
-          <div className="modal-content modal-tarifa" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{tarifaEditando ? "Editar tarifa" : "Nueva tarifa"}</h2>
               <button onClick={() => setModalAbierto(false)} className="modal-close">
