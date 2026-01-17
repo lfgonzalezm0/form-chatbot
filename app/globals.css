@@ -5410,95 +5410,149 @@ textarea {
 }
 
 /* ============================================
-   PANEL DE REFERENCIAS EN TARIFAS
+   MODAL DE REFERENCIAS EN TARIFAS
    ============================================ */
-.referencias-lista {
+.modal-referencias {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.modal-referencias-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #075e54;
+  color: white;
+}
+
+.modal-referencias-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-close-btn svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
+.modal-referencias-body {
+  padding: 20px;
+}
+
+.modal-cargando {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
   gap: 12px;
-}
-
-.referencia-item {
-  padding: 12px 16px;
-  background-color: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.referencia-item:hover {
-  background-color: #f0f0f0;
-  border-color: #ccc;
-}
-
-.referencia-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-
-.referencia-destino {
-  font-weight: 600;
-  font-size: 14px;
-  color: #333;
-}
-
-.referencia-ciudad {
-  font-size: 12px;
   color: #666;
-  margin-top: 2px;
 }
 
-.referencia-cantidad {
-  font-size: 11px;
-  color: #888;
-  background-color: #e0e0e0;
-  padding: 2px 8px;
-  border-radius: 10px;
+.modal-field {
+  margin-bottom: 16px;
 }
 
-.referencia-input-group {
-  display: flex;
-  gap: 8px;
-}
-
-.referencia-input-group input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+.modal-field label {
+  display: block;
   font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.modal-field select,
+.modal-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
+  background-color: white;
 }
 
-.referencia-input-group input:focus {
+.modal-field select:focus,
+.modal-field input:focus {
   border-color: #075e54;
 }
 
-.referencia-input-group input::placeholder {
-  color: #aaa;
+.modal-field-hint {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
 }
 
-.btn-guardar-ref {
-  padding: 8px 14px;
-  background-color: #075e54;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
+.modal-referencias-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modal-referencias-footer .btn-cancelar {
+  flex: 1;
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
+  color: #666;
   cursor: pointer;
-  transition: background-color 0.2s;
-  white-space: nowrap;
+  transition: all 0.2s;
 }
 
-.btn-guardar-ref:hover {
+.modal-referencias-footer .btn-cancelar:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+.modal-referencias-footer .btn-guardar {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background-color: #075e54;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-referencias-footer .btn-guardar:hover {
   background-color: #064e46;
 }
 
-.btn-guardar-ref:disabled {
+.modal-referencias-footer .btn-guardar:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }

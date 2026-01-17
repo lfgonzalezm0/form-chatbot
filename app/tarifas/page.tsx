@@ -594,98 +594,85 @@ export default function TarifasPage() {
         </div>
       )}
 
-      {/* Panel de referencias por destino */}
-      <div className={`tarifas-panel-lateral panel-referencias ${panelReferencias ? 'abierto' : ''}`}>
-        <div className="panel-header">
-          <h2>Referencias por Destino</h2>
-          <button onClick={cerrarPanelReferencias} className="panel-close">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="panel-referencias-contenido">
-          {cargandoDestinos ? (
-            <div className="panel-cargando">
-              <div className="loading-spinner"></div>
-              <p>Cargando destinos...</p>
+      {/* Modal de referencias por destino */}
+      {panelReferencias && (
+        <div className="modal-overlay" onClick={cerrarPanelReferencias}>
+          <div className="modal-referencias" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-referencias-header">
+              <h2>Asignar Referencia por Destino</h2>
+              <button onClick={cerrarPanelReferencias} className="modal-close-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </button>
             </div>
-          ) : (
-            <>
-              <p className="panel-descripcion">
-                Selecciona un destino para asignar o modificar su referencia.
-                La referencia se actualizará en todas las tarifas con ese destino.
-              </p>
 
-              <div className="destinos-lista">
-                {destinosUnicos.length === 0 ? (
-                  <p className="sin-destinos">No hay destinos disponibles</p>
-                ) : (
-                  destinosUnicos.map((destino, index) => (
-                    <div
-                      key={index}
-                      className={`destino-item ${destinoSeleccionado?.destino === destino.destino ? 'seleccionado' : ''}`}
-                      onClick={() => seleccionarDestino(destino)}
-                    >
-                      <div className="destino-info">
-                        <span className="destino-nombre">{destino.destino}</span>
-                        <span className="destino-ciudad">{destino.ciudad_destino}</span>
-                      </div>
-                      <div className="destino-meta">
-                        {destino.referencia ? (
-                          <span className="badge-referencia">{destino.referencia}</span>
-                        ) : (
-                          <span className="sin-referencia-tag">Sin referencia</span>
-                        )}
-                        <span className="destino-cantidad">{destino.cantidad} tarifas</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {destinoSeleccionado && (
-                <div className="editar-referencia-form">
-                  <div className="editar-referencia-header">
-                    <strong>Editar referencia para:</strong>
-                    <span>{destinoSeleccionado.destino}</span>
-                  </div>
-                  <div className="panel-field">
-                    <label>Nueva referencia</label>
-                    <input
-                      type="text"
-                      value={nuevaReferencia}
-                      onChange={(e) => setNuevaReferencia(e.target.value)}
-                      placeholder="Ej: REF-001, Zona Norte, etc."
-                    />
-                  </div>
-                  <div className="panel-actions">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDestinoSeleccionado(null);
-                        setNuevaReferencia("");
-                      }}
-                      className="btn-cancelar"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={guardarReferenciaPorDestino}
-                      className="btn-guardar"
-                      disabled={guardando}
-                    >
-                      {guardando ? "Guardando..." : `Actualizar ${destinoSeleccionado.cantidad} tarifas`}
-                    </button>
-                  </div>
+            <div className="modal-referencias-body">
+              {cargandoDestinos ? (
+                <div className="modal-cargando">
+                  <div className="loading-spinner"></div>
+                  <p>Cargando destinos...</p>
                 </div>
+              ) : (
+                <>
+                  <div className="modal-field">
+                    <label>Seleccionar destino</label>
+                    <select
+                      value={destinoSeleccionado?.destino || ""}
+                      onChange={(e) => {
+                        const destino = destinosUnicos.find(d => d.destino === e.target.value);
+                        if (destino) {
+                          setDestinoSeleccionado(destino);
+                          setNuevaReferencia(destino.referencia || "");
+                        } else {
+                          setDestinoSeleccionado(null);
+                          setNuevaReferencia("");
+                        }
+                      }}
+                    >
+                      <option value="">-- Seleccione un destino --</option>
+                      {destinosUnicos.map((destino, index) => (
+                        <option key={index} value={destino.destino}>
+                          {destino.destino} ({destino.ciudad_destino}) - {destino.cantidad} tarifas
+                          {destino.referencia ? ` [${destino.referencia}]` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {destinoSeleccionado && (
+                    <div className="modal-field">
+                      <label>Referencia</label>
+                      <input
+                        type="text"
+                        value={nuevaReferencia}
+                        onChange={(e) => setNuevaReferencia(e.target.value)}
+                        placeholder="Ej: REF-001, Zona Norte, etc."
+                      />
+                      <span className="modal-field-hint">
+                        Se actualizará en {destinoSeleccionado.cantidad} tarifas
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
-            </>
-          )}
+            </div>
+
+            <div className="modal-referencias-footer">
+              <button onClick={cerrarPanelReferencias} className="btn-cancelar">
+                Cancelar
+              </button>
+              <button
+                onClick={guardarReferenciaPorDestino}
+                className="btn-guardar"
+                disabled={guardando || !destinoSeleccionado}
+              >
+                {guardando ? "Guardando..." : "Guardar referencia"}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
