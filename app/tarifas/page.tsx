@@ -326,7 +326,7 @@ export default function TarifasPage() {
                   <td>
                     <span className="badge-ciudad">{tarifa.ciudad_destino}</span>
                   </td>
-                  <td className="col-precio">${tarifa.precio.toFixed(2)}</td>
+                  <td className="col-precio">${Number(tarifa.precio).toFixed(2)}</td>
                   <td className="col-acciones">
                     <button
                       className="btn-accion editar"
