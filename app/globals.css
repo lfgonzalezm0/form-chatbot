@@ -2760,22 +2760,22 @@ body {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
   z-index: 1000;
+  overflow-y: auto;
 }
 
 .modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background-color: white;
   border-radius: 12px;
-  width: 100%;
+  width: calc(100% - 40px);
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  position: relative;
   z-index: 1001;
 }
 
@@ -4444,7 +4444,7 @@ video.media-preview-full {
   }
 
   .modal-content {
-    margin: 10px;
+    width: calc(100% - 20px);
   }
 }
 
@@ -4693,11 +4693,11 @@ textarea {
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translate(-50%, -50%) translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate(-50%, -50%) translateY(0) scale(1);
   }
 }
 
