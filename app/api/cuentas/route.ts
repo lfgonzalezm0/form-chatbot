@@ -32,7 +32,7 @@ export async function GET() {
     }
 
     const result = await pool.query(
-      `SELECT id, nombre, tipousuario, usuario, correo, telefono, estado
+      `SELECT id, nombre, tipousuario, usuario, correo, telefono, estado, modulos
        FROM cuentassystem
        ORDER BY nombre ASC`
     );
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { nombre, tipousuario, usuario, contrasena, correo, telefono, estado } = body;
+    const { nombre, tipousuario, usuario, contrasena, correo, telefono, estado, modulos } = body;
 
     if (!usuario || !contrasena || !tipousuario) {
       return NextResponse.json(
@@ -116,10 +116,10 @@ export async function POST(request: Request) {
     }
 
     const result = await pool.query(
-      `INSERT INTO cuentassystem (nombre, tipousuario, usuario, contrasena, correo, telefono, estado)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, nombre, tipousuario, usuario, correo, telefono, estado`,
-      [nombre || null, tipousuario, usuario, contrasena, correoNormalizado, telefonoNormalizado, estado || "activo"]
+      `INSERT INTO cuentassystem (nombre, tipousuario, usuario, contrasena, correo, telefono, estado, modulos)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id, nombre, tipousuario, usuario, correo, telefono, estado, modulos`,
+      [nombre || null, tipousuario, usuario, contrasena, correoNormalizado, telefonoNormalizado, estado || "activo", modulos ? JSON.stringify(modulos) : null]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });

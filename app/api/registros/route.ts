@@ -34,7 +34,9 @@ export async function GET() {
         estado,
         accionadmin,
         paso,
-        bloqueado
+        bloqueado,
+        urlimagen,
+        videourl
       FROM consultanecesidad
     `;
 

@@ -17,6 +17,8 @@ interface Registro {
   accionadmin: string | null;
   paso: string | null;
   bloqueado: boolean | null;
+  urlimagen: string | null;
+  videourl: string | null;
 }
 
 function formatearFecha(fecha: string): string {
@@ -57,6 +59,9 @@ export default function RegistrosPage() {
   // Modal de confirmacion para eliminar
   const [confirmandoEliminar, setConfirmandoEliminar] = useState<Registro | null>(null);
   const [eliminando, setEliminando] = useState(false);
+
+  // Previsualizacion de medios
+  const [mediaPreview, setMediaPreview] = useState<{ tipo: "imagen" | "video"; url: string } | null>(null);
 
   useEffect(() => {
     fetchRegistros();
@@ -394,10 +399,6 @@ export default function RegistrosPage() {
                               <strong>GUID:</strong>
                               <span className="guid-texto">{registro.guid}</span>
                             </div>
-                            <div className="detalle-campo">
-                              <strong>Enlace:</strong>
-                              <span className="enlace-texto">{registro.enlace || "-"}</span>
-                            </div>
                             <div className="detalle-campo detalle-campo-full">
                               <strong>Contexto completo:</strong>
                               <p>{registro.contexto || "-"}</p>
@@ -410,6 +411,42 @@ export default function RegistrosPage() {
                               <strong>Respuesta completa:</strong>
                               <p>{registro.respuesta || "-"}</p>
                             </div>
+                            {(registro.urlimagen || registro.videourl) && (
+                              <div className="detalle-campo detalle-campo-full detalle-medios">
+                                <strong>Archivos adjuntos:</strong>
+                                <div className="medios-grid">
+                                  {registro.urlimagen && (
+                                    <div className="medio-item">
+                                      <img
+                                        src={registro.urlimagen}
+                                        alt="Imagen adjunta"
+                                        onClick={() => setMediaPreview({ tipo: "imagen", url: registro.urlimagen! })}
+                                        className="imagen-preview-registro"
+                                        title="Clic para ver en grande"
+                                      />
+                                      <span className="medio-label">Imagen</span>
+                                    </div>
+                                  )}
+                                  {registro.videourl && (
+                                    <div className="medio-item">
+                                      <div
+                                        className="video-thumbnail-registro"
+                                        onClick={() => setMediaPreview({ tipo: "video", url: registro.videourl! })}
+                                        title="Clic para ver en grande"
+                                      >
+                                        <video src={registro.videourl} muted />
+                                        <div className="video-play-overlay-registro">
+                                          <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z" />
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      <span className="medio-label">Video</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -447,6 +484,24 @@ export default function RegistrosPage() {
                 {eliminando ? "Eliminando..." : "Eliminar"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Previsualizacion de Medios */}
+      {mediaPreview && (
+        <div className="modal-overlay modal-media-overlay" onClick={() => setMediaPreview(null)}>
+          <div className="modal-media-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-media-close" onClick={() => setMediaPreview(null)}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+              </svg>
+            </button>
+            {mediaPreview.tipo === "imagen" ? (
+              <img src={mediaPreview.url} alt="Previsualización" className="media-preview-full" />
+            ) : (
+              <video src={mediaPreview.url} controls autoPlay className="media-preview-full" />
+            )}
           </div>
         </div>
       )}

@@ -13,6 +13,13 @@ interface Cuenta {
   correo: string | null;
   telefono: string | null;
   estado: string;
+  modulos: string[] | null;
+}
+
+interface Modulo {
+  id: number;
+  nombre: string;
+  categoria: string | null;
 }
 
 interface UsuarioSesion {
@@ -46,6 +53,11 @@ export default function AdminCuentasPage() {
   });
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
+
+  // Módulos
+  const [modulos, setModulos] = useState<Modulo[]>([]);
+  const [modulosSeleccionados, setModulosSeleccionados] = useState<string[]>([]);
+  const [busquedaModulo, setBusquedaModulo] = useState("");
 
   // Modal de confirmación para eliminar
   const [confirmandoEliminar, setConfirmandoEliminar] = useState<Cuenta | null>(null);
@@ -90,11 +102,25 @@ export default function AdminCuentasPage() {
     }
   }, []);
 
+  // Cargar módulos
+  const fetchModulos = useCallback(async () => {
+    try {
+      const res = await fetch("/api/modulos");
+      if (res.ok) {
+        const data = await res.json();
+        setModulos(data);
+      }
+    } catch {
+      console.error("Error al cargar módulos");
+    }
+  }, []);
+
   useEffect(() => {
     if (usuarioSesion) {
       fetchCuentas();
+      fetchModulos();
     }
-  }, [usuarioSesion, fetchCuentas]);
+  }, [usuarioSesion, fetchCuentas, fetchModulos]);
 
   // Filtrar cuentas
   const cuentasFiltradas = cuentas.filter((c) => {
@@ -112,6 +138,29 @@ export default function AdminCuentasPage() {
     return true;
   });
 
+  // Filtrar módulos por búsqueda
+  const modulosFiltrados = modulos.filter((m) =>
+    m.nombre.toLowerCase().includes(busquedaModulo.toLowerCase()) ||
+    (m.categoria && m.categoria.toLowerCase().includes(busquedaModulo.toLowerCase()))
+  );
+
+  // Agrupar módulos por categoría
+  const modulosPorCategoria = modulosFiltrados.reduce((acc, modulo) => {
+    const cat = modulo.categoria || "Sin categoría";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(modulo);
+    return acc;
+  }, {} as Record<string, Modulo[]>);
+
+  // Toggle módulo
+  const toggleModulo = (nombreModulo: string) => {
+    setModulosSeleccionados((prev) =>
+      prev.includes(nombreModulo)
+        ? prev.filter((m) => m !== nombreModulo)
+        : [...prev, nombreModulo]
+    );
+  };
+
   // Abrir modal para crear
   const abrirModalCrear = () => {
     setCuentaEditando(null);
@@ -124,6 +173,8 @@ export default function AdminCuentasPage() {
       telefono: "",
       estado: "activo",
     });
+    setModulosSeleccionados([]);
+    setBusquedaModulo("");
     setErrorForm(null);
     setModalAbierto(true);
   };
@@ -140,6 +191,8 @@ export default function AdminCuentasPage() {
       telefono: cuenta.telefono || "",
       estado: cuenta.estado,
     });
+    setModulosSeleccionados(cuenta.modulos || []);
+    setBusquedaModulo("");
     setErrorForm(null);
     setModalAbierto(true);
   };
@@ -156,9 +209,9 @@ export default function AdminCuentasPage() {
         : "/api/cuentas";
       const method = cuentaEditando ? "PUT" : "POST";
 
-      const bodyData = { ...formData };
+      const bodyData: Record<string, unknown> = { ...formData, modulos: modulosSeleccionados };
       if (cuentaEditando && !formData.contrasena) {
-        delete (bodyData as Partial<typeof formData>).contrasena;
+        delete bodyData.contrasena;
       }
 
       const res = await fetch(url, {
@@ -347,6 +400,7 @@ export default function AdminCuentasPage() {
                   <th>Tipo</th>
                   <th>Correo</th>
                   <th>Teléfono</th>
+                  <th>Módulos</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -354,7 +408,7 @@ export default function AdminCuentasPage() {
               <tbody>
                 {cuentasFiltradas.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="admin-empty">
+                    <td colSpan={8} className="admin-empty">
                       No se encontraron cuentas
                     </td>
                   </tr>
@@ -370,6 +424,20 @@ export default function AdminCuentasPage() {
                       </td>
                       <td>{cuenta.correo || "-"}</td>
                       <td>{cuenta.telefono || "-"}</td>
+                      <td>
+                        <div className="modulos-badges">
+                          {cuenta.modulos && cuenta.modulos.length > 0 ? (
+                            cuenta.modulos.slice(0, 2).map((mod) => (
+                              <span key={mod} className="modulo-badge">{mod}</span>
+                            ))
+                          ) : (
+                            <span className="sin-modulos">-</span>
+                          )}
+                          {cuenta.modulos && cuenta.modulos.length > 2 && (
+                            <span className="modulos-mas">+{cuenta.modulos.length - 2}</span>
+                          )}
+                        </div>
+                      </td>
                       <td>
                         <button
                           className={`estado-toggle ${cuenta.estado}`}
@@ -527,6 +595,56 @@ export default function AdminCuentasPage() {
                   <option value="activo">Activo</option>
                   <option value="bloqueado">Bloqueado</option>
                 </select>
+              </div>
+
+              {/* Panel de módulos */}
+              <div className="modulos-panel">
+                <div className="modulos-panel-header">
+                  <label>Módulos disponibles</label>
+                  <span className="modulos-count">{modulosSeleccionados.length} seleccionados</span>
+                </div>
+                <div className="modulos-search">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Buscar módulo..."
+                    value={busquedaModulo}
+                    onChange={(e) => setBusquedaModulo(e.target.value)}
+                  />
+                </div>
+                <div className="modulos-lista">
+                  {Object.keys(modulosPorCategoria).length === 0 ? (
+                    <div className="modulos-vacio">No se encontraron módulos</div>
+                  ) : (
+                    Object.entries(modulosPorCategoria).map(([categoria, mods]) => (
+                      <div key={categoria} className="modulos-categoria">
+                        <div className="categoria-nombre">{categoria}</div>
+                        {mods.map((modulo) => (
+                          <label key={modulo.id} className="modulo-item">
+                            <input
+                              type="checkbox"
+                              checked={modulosSeleccionados.includes(modulo.nombre)}
+                              onChange={() => toggleModulo(modulo.nombre)}
+                            />
+                            <span className="modulo-nombre">{modulo.nombre}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ))
+                  )}
+                </div>
+                {modulosSeleccionados.length > 0 && (
+                  <div className="modulos-seleccionados">
+                    {modulosSeleccionados.map((mod) => (
+                      <span key={mod} className="modulo-tag">
+                        {mod}
+                        <button type="button" onClick={() => toggleModulo(mod)}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="modal-actions">

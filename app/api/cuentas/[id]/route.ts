@@ -37,7 +37,7 @@ export async function GET(
     const { id } = await params;
 
     const result = await pool.query(
-      `SELECT id, nombre, tipousuario, usuario, correo, telefono, estado
+      `SELECT id, nombre, tipousuario, usuario, correo, telefono, estado, modulos
        FROM cuentassystem
        WHERE id = $1`,
       [id]
@@ -76,7 +76,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { nombre, tipousuario, usuario, contrasena, correo, telefono, estado } = body;
+    const { nombre, tipousuario, usuario, contrasena, correo, telefono, estado, modulos } = body;
 
     // Normalizar valores vacios a null
     const correoNormalizado = correo?.trim() || null;
@@ -173,6 +173,10 @@ export async function PUT(
       updates.push(`estado = $${paramCount++}`);
       values.push(estado);
     }
+    if (modulos !== undefined) {
+      updates.push(`modulos = $${paramCount++}`);
+      values.push(JSON.stringify(modulos));
+    }
 
     if (updates.length === 0) {
       return NextResponse.json(
@@ -187,7 +191,7 @@ export async function PUT(
       `UPDATE cuentassystem
        SET ${updates.join(", ")}
        WHERE id = $${paramCount}
-       RETURNING id, nombre, tipousuario, usuario, correo, telefono, estado`,
+       RETURNING id, nombre, tipousuario, usuario, correo, telefono, estado, modulos`,
       values
     );
 

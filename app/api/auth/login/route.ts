@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     // Buscar usuario en la base de datos
     const result = await pool.query(
-      `SELECT id, nombre, tipousuario, usuario, correo, telefono, estado
+      `SELECT id, nombre, tipousuario, usuario, correo, telefono, estado, modulos
        FROM cuentassystem
        WHERE usuario = $1 AND contrasena = $2`,
       [usuario, contrasena]
@@ -39,6 +39,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Parsear módulos (pueden venir como string JSON o array)
+    let modulos: string[] = [];
+    if (cuenta.modulos) {
+      if (typeof cuenta.modulos === "string") {
+        try {
+          modulos = JSON.parse(cuenta.modulos);
+        } catch {
+          modulos = [];
+        }
+      } else if (Array.isArray(cuenta.modulos)) {
+        modulos = cuenta.modulos;
+      }
+    }
+
     // Crear sesión en cookie
     const sessionData = {
       id: cuenta.id,
@@ -47,6 +61,7 @@ export async function POST(request: Request) {
       usuario: cuenta.usuario,
       correo: cuenta.correo,
       telefono: cuenta.telefono,
+      modulos: modulos,
     };
 
     const cookieStore = await cookies();

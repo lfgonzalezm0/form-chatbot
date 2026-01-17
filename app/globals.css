@@ -1467,6 +1467,95 @@ body {
   border-radius: 4px;
 }
 
+/* Medios en detalle de registros */
+.detalle-medios {
+  margin-top: 8px;
+}
+
+.medios-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.medio-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.medio-label {
+  font-size: 12px;
+  color: #667781;
+  font-weight: 500;
+}
+
+.imagen-preview-registro {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid #e0e0e0;
+}
+
+.imagen-preview-registro:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #25d366;
+}
+
+.video-thumbnail-registro {
+  position: relative;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.video-thumbnail-registro:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #25d366;
+}
+
+.video-thumbnail-registro video {
+  max-width: 200px;
+  max-height: 150px;
+  display: block;
+  object-fit: cover;
+}
+
+.video-play-overlay-registro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.video-play-overlay-registro svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+  margin-left: 3px;
+}
+
+.video-thumbnail-registro:hover .video-play-overlay-registro {
+  background-color: rgba(37, 211, 102, 0.9);
+}
+
 /* Responsive para registros */
 @media (max-width: 1024px) {
   .registros-filtros {
@@ -3053,6 +3142,7 @@ body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 68px);
+  overflow: hidden;
 }
 
 .panel-preguntas {
@@ -3061,6 +3151,7 @@ body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 68px);
+  overflow: hidden;
 }
 
 /* Header del panel */
@@ -4021,14 +4112,9 @@ body {
 
 /* Video en la card de pregunta */
 .pregunta-video {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-top: 12px;
-  padding: 10px 12px;
-  background-color: #fff3e0;
-  border-radius: 8px;
-  border: 1px solid #ffcc80;
+  padding-top: 12px;
+  border-top: 1px solid #e8e8e8;
 }
 
 .pregunta-video svg {
@@ -4049,6 +4135,123 @@ body {
 .pregunta-video a:hover {
   color: #bf360c;
   text-decoration: underline;
+}
+
+/* Imagen clickeable para preview */
+.imagen-clickeable {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.imagen-clickeable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Video thumbnail con overlay de play */
+.video-thumbnail-container {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.video-thumbnail-container .video-preview-card {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: contain;
+  display: block;
+}
+
+.video-thumbnail-container:hover .video-preview-card {
+  transform: scale(1.02);
+}
+
+.video-play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.video-play-overlay svg {
+  width: 30px;
+  height: 30px;
+  color: white;
+  margin-left: 4px;
+}
+
+.video-thumbnail-container:hover .video-play-overlay {
+  background-color: rgba(37, 211, 102, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Modal de previsualizacion de medios */
+.modal-media-overlay {
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.modal-media-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-media-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  z-index: 1;
+}
+
+.modal-media-close svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.modal-media-close:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.media-preview-full {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+video.media-preview-full {
+  background-color: black;
 }
 
 /* Responsive para necesidades */
@@ -4528,6 +4731,480 @@ textarea {
   }
 
   .nav-menu-item-description {
+    display: none;
+  }
+}
+
+/* ============================================
+   PAGINA DE TARIFAS
+   ============================================ */
+.tarifas-page {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.tarifas-loading,
+.tarifas-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+  color: #667781;
+}
+
+.tarifas-error svg {
+  width: 48px;
+  height: 48px;
+  color: #e53935;
+}
+
+.btn-volver-inicio {
+  padding: 10px 20px;
+  background-color: #075e54;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-volver-inicio:hover {
+  background-color: #064e46;
+}
+
+/* Header de tarifas */
+.tarifas-header {
+  background-color: #075e54;
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tarifas-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tarifas-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.tarifas-back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tarifas-back-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.tarifas-header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.tarifas-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tarifas-count {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.tarifas-header .refresh-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tarifas-header .refresh-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tarifas-header .refresh-btn svg {
+  color: white;
+}
+
+/* Filtros de tarifas */
+.tarifas-filtros {
+  background-color: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Contenedor de la tabla de tarifas */
+.tarifas-tabla-container {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 24px;
+}
+
+.tarifas-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+}
+
+.tarifas-tabla thead {
+  background-color: #f0f2f5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tarifas-tabla th {
+  padding: 12px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.tarifas-tabla td {
+  padding: 10px;
+  border-bottom: 1px solid #f0f2f5;
+  color: #333;
+}
+
+.tarifas-tabla tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.tarifas-tabla .col-id {
+  width: 60px;
+  font-weight: 600;
+  color: #667781;
+}
+
+.tarifas-tabla .col-precio {
+  font-weight: 600;
+  color: #075e54;
+}
+
+.tarifas-tabla .col-acciones {
+  width: 100px;
+  text-align: center;
+}
+
+.tarifas-tabla .tabla-vacia {
+  text-align: center;
+  padding: 40px;
+  color: #667781;
+}
+
+/* Badge de ciudad */
+.badge-ciudad {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Botones de accion en tabla */
+.btn-accion {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin: 0 2px;
+}
+
+.btn-accion svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-accion.editar {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.btn-accion.editar:hover {
+  background-color: #bbdefb;
+}
+
+.btn-accion.eliminar {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.btn-accion.eliminar:hover {
+  background-color: #ffcdd2;
+}
+
+/* Boton crear tarifa */
+.btn-crear-tarifa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #075e54;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-crear-tarifa:hover {
+  background-color: #064e46;
+}
+
+.btn-crear-tarifa svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Modal tarifa */
+.modal-tarifa {
+  max-width: 500px;
+}
+
+/* ============================================
+   MODULOS EN CUENTAS
+   ============================================ */
+/* Badges de módulos en la tabla */
+.modulos-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.modulo-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.modulos-mas {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: #f5f5f5;
+  color: #666;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.sin-modulos {
+  color: #999;
+}
+
+/* Panel de módulos en el modal */
+.modulos-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.modulos-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modulos-panel-header label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.modulos-panel-header .modulos-count {
+  font-size: 12px;
+  color: #666;
+  background-color: #e0e0e0;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.modulos-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fafafa;
+}
+
+.modulos-search svg {
+  width: 18px;
+  height: 18px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.modulos-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+}
+
+.modulos-lista {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.modulos-vacio {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+}
+
+.modulos-categoria {
+  margin-bottom: 8px;
+}
+
+.categoria-nombre {
+  padding: 4px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  background-color: #f9f9f9;
+}
+
+.modulo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.modulo-item:hover {
+  background-color: #f5f5f5;
+}
+
+.modulo-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #1a237e;
+}
+
+.modulo-nombre {
+  font-size: 14px;
+  color: #333;
+}
+
+.modulos-seleccionados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+}
+
+.modulo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background-color: #1a237e;
+  color: white;
+  border-radius: 14px;
+  font-size: 12px;
+}
+
+.modulo-tag button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  margin-left: 2px;
+  opacity: 0.8;
+}
+
+.modulo-tag button:hover {
+  opacity: 1;
+}
+
+/* Responsive tarifas */
+@media (max-width: 768px) {
+  .tarifas-header {
+    padding: 12px 16px;
+  }
+
+  .tarifas-header h1 {
+    font-size: 16px;
+  }
+
+  .tarifas-filtros {
+    padding: 12px 16px;
+  }
+
+  .tarifas-tabla-container {
+    padding: 12px 16px;
+  }
+
+  .tarifas-tabla {
+    font-size: 12px;
+  }
+
+  .tarifas-tabla th,
+  .tarifas-tabla td {
+    padding: 8px 6px;
+  }
+
+  .btn-crear-tarifa {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .btn-crear-tarifa span {
     display: none;
   }
 }

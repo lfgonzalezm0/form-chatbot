@@ -88,6 +88,9 @@ export default function NecesidadesPage() {
   // Vista movil
   const [vistaMovil, setVistaMovil] = useState<"necesidades" | "preguntas">("necesidades");
 
+  // Previsualizacion de medios
+  const [mediaPreview, setMediaPreview] = useState<{ tipo: "imagen" | "video"; url: string } | null>(null);
+
   useEffect(() => {
     fetchNecesidades();
   }, []);
@@ -816,7 +819,13 @@ export default function NecesidadesPage() {
                         )}
                         {p.urlimagen && (
                           <div className="pregunta-imagen">
-                            <img src={p.urlimagen} alt="Imagen adjunta" />
+                            <img
+                              src={p.urlimagen}
+                              alt="Imagen adjunta"
+                              onClick={() => setMediaPreview({ tipo: "imagen", url: p.urlimagen! })}
+                              className="imagen-clickeable"
+                              title="Clic para ver en grande"
+                            />
                             <div className="urlimagen-container">
                               <span className="urlimagen-label">URL para WhatsApp:</span>
                               <div className="urlimagen-copy">
@@ -848,7 +857,18 @@ export default function NecesidadesPage() {
                         )}
                         {p.videourl && (
                           <div className="pregunta-video">
-                            <video src={p.videourl} controls className="video-preview-card" />
+                            <div
+                              className="video-thumbnail-container"
+                              onClick={() => setMediaPreview({ tipo: "video", url: p.videourl! })}
+                              title="Clic para ver en grande"
+                            >
+                              <video src={p.videourl} className="video-preview-card" muted />
+                              <div className="video-play-overlay">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
+                            </div>
                             <div className="videourl-container">
                               <span className="videourl-label">URL para WhatsApp:</span>
                               <div className="videourl-copy">
@@ -1198,6 +1218,24 @@ export default function NecesidadesPage() {
                 Eliminar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Previsualizacion de Medios */}
+      {mediaPreview && (
+        <div className="modal-overlay modal-media-overlay" onClick={() => setMediaPreview(null)}>
+          <div className="modal-media-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-media-close" onClick={() => setMediaPreview(null)}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+              </svg>
+            </button>
+            {mediaPreview.tipo === "imagen" ? (
+              <img src={mediaPreview.url} alt="Previsualización" className="media-preview-full" />
+            ) : (
+              <video src={mediaPreview.url} controls autoPlay className="media-preview-full" />
+            )}
           </div>
         </div>
       )}
