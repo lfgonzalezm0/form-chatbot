@@ -92,23 +92,42 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { categoria, necesidad, pregunta, respuesta, variante, imagenUrl, videoUrl } = body;
+    const { categoria, necesidad, pregunta, respuesta, variante, imagenUrl, videoUrl, telefonocaso } = body;
 
     // Actualizar con las URLs directamente
     // NOTA: variante NO usa COALESCE para permitir eliminar variantes (poner null o string vacío)
-    const result = await pool.query(
-      `UPDATE preguntassystem
-       SET categoria = COALESCE($2, categoria),
-           necesidad = COALESCE($3, necesidad),
-           pregunta = COALESCE($4, pregunta),
-           respuesta = COALESCE($5, respuesta),
-           variante = $6,
-           urlimagen = $7,
-           videourl = $8
-       WHERE id = $1
-       RETURNING *`,
-      [id, categoria, necesidad, pregunta, respuesta, variante, imagenUrl !== undefined ? imagenUrl : null, videoUrl !== undefined ? videoUrl : null]
-    );
+    let result;
+    if (esAdmin && telefonocaso !== undefined) {
+      // Admin puede cambiar telefonocaso
+      result = await pool.query(
+        `UPDATE preguntassystem
+         SET categoria = COALESCE($2, categoria),
+             necesidad = COALESCE($3, necesidad),
+             pregunta = COALESCE($4, pregunta),
+             respuesta = COALESCE($5, respuesta),
+             variante = $6,
+             urlimagen = $7,
+             videourl = $8,
+             telefonocaso = $9
+         WHERE id = $1
+         RETURNING *`,
+        [id, categoria, necesidad, pregunta, respuesta, variante, imagenUrl !== undefined ? imagenUrl : null, videoUrl !== undefined ? videoUrl : null, telefonocaso]
+      );
+    } else {
+      result = await pool.query(
+        `UPDATE preguntassystem
+         SET categoria = COALESCE($2, categoria),
+             necesidad = COALESCE($3, necesidad),
+             pregunta = COALESCE($4, pregunta),
+             respuesta = COALESCE($5, respuesta),
+             variante = $6,
+             urlimagen = $7,
+             videourl = $8
+         WHERE id = $1
+         RETURNING *`,
+        [id, categoria, necesidad, pregunta, respuesta, variante, imagenUrl !== undefined ? imagenUrl : null, videoUrl !== undefined ? videoUrl : null]
+      );
+    }
 
     return NextResponse.json(result.rows[0]);
   } catch (error) {

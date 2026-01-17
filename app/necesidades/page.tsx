@@ -11,6 +11,7 @@ interface Necesidad {
   necesidad: string | null;
   descripcion: string | null;
   habilitado: boolean | null;
+  cuenta_nombre?: string | null;
 }
 
 interface Pregunta {
@@ -23,6 +24,13 @@ interface Pregunta {
   variante: string | null;
   urlimagen: string | null;
   videourl: string | null;
+  cuenta_nombre?: string | null;
+}
+
+interface Cuenta {
+  id: number;
+  nombre: string;
+  telefono: string;
 }
 
 const CATEGORIAS = [
@@ -91,9 +99,17 @@ export default function NecesidadesPage() {
   // Previsualizacion de medios
   const [mediaPreview, setMediaPreview] = useState<{ tipo: "imagen" | "video"; url: string } | null>(null);
 
+  // Cuentas para selector (solo admin)
+  const [cuentas, setCuentas] = useState<Cuenta[]>([]);
+
+  const esAdmin = usuario?.tipousuario === "Administrador";
+
   useEffect(() => {
     fetchNecesidades();
-  }, []);
+    if (esAdmin) {
+      fetchCuentas();
+    }
+  }, [esAdmin]);
 
   useEffect(() => {
     aplicarFiltrosNecesidades();
@@ -124,6 +140,18 @@ export default function NecesidadesPage() {
       setError("No se pudieron cargar las necesidades");
     } finally {
       setCargandoNecesidades(false);
+    }
+  };
+
+  const fetchCuentas = async () => {
+    try {
+      const res = await fetch("/api/cuentas");
+      if (res.ok) {
+        const data = await res.json();
+        setCuentas(data);
+      }
+    } catch (err) {
+      console.error("Error al cargar cuentas:", err);
     }
   };
 
@@ -656,6 +684,11 @@ export default function NecesidadesPage() {
                     <div className="necesidad-categoria">
                       <span className="badge-categoria">{n.categoria}</span>
                       {!n.habilitado && <span className="badge-deshabilitado">Deshabilitado</span>}
+                      {esAdmin && n.cuenta_nombre && (
+                        <span className="badge-cuenta" title={`Teléfono: ${n.telefonocaso}`}>
+                          {n.cuenta_nombre}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="necesidad-acciones">
@@ -776,6 +809,11 @@ export default function NecesidadesPage() {
                     <div key={p.id} className="pregunta-card">
                       <div className="pregunta-header">
                         <span className="badge-categoria">{p.categoria}</span>
+                        {esAdmin && p.cuenta_nombre && (
+                          <span className="badge-cuenta" title={`Teléfono: ${p.telefonocaso}`}>
+                            {p.cuenta_nombre}
+                          </span>
+                        )}
                         <div className="pregunta-acciones">
                           <button
                             className="btn-accion-mini editar"
@@ -954,6 +992,22 @@ export default function NecesidadesPage() {
                   </button>
                 </div>
               </div>
+              {esAdmin && (
+                <div className="form-field">
+                  <label>Cuenta asociada</label>
+                  <select
+                    value={formNecesidad.telefonocaso || ""}
+                    onChange={(e) => setFormNecesidad({ ...formNecesidad, telefonocaso: e.target.value || null })}
+                  >
+                    <option value="">Sin cuenta asignada</option>
+                    {cuentas.map((c) => (
+                      <option key={c.id} value={c.telefono}>
+                        {c.nombre} ({c.telefono})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="modal-actions">
                 <button className="btn-cancelar" onClick={() => setModalNecesidad(null)}>
                   Cancelar
@@ -1036,6 +1090,22 @@ export default function NecesidadesPage() {
                   onChange={(e) => setFormPregunta({ ...formPregunta, respuesta: e.target.value })}
                 />
               </div>
+              {esAdmin && (
+                <div className="form-field">
+                  <label>Cuenta asociada</label>
+                  <select
+                    value={formPregunta.telefonocaso || ""}
+                    onChange={(e) => setFormPregunta({ ...formPregunta, telefonocaso: e.target.value || null })}
+                  >
+                    <option value="">Sin cuenta asignada</option>
+                    {cuentas.map((c) => (
+                      <option key={c.id} value={c.telefono}>
+                        {c.nombre} ({c.telefono})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="form-field">
                 <label>Variantes (condiciones que modifican la respuesta)</label>
                 <div className="variantes-editor">

@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "./AuthProvider";
 
 interface NavMenuItem {
   href: string;
   label: string;
   icon: React.ReactNode;
   description: string;
+  modulo: string | null; // null significa que siempre es visible
 }
 
 const menuItems: NavMenuItem[] = [
@@ -16,6 +18,7 @@ const menuItems: NavMenuItem[] = [
     href: "/",
     label: "Conversaciones",
     description: "Gestionar conversaciones del chatbot",
+    modulo: "conversaciones",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
@@ -26,6 +29,7 @@ const menuItems: NavMenuItem[] = [
     href: "/necesidades",
     label: "Necesidades",
     description: "Gestionar necesidades y preguntas",
+    modulo: "necesidades",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
@@ -36,6 +40,7 @@ const menuItems: NavMenuItem[] = [
     href: "/usuarios",
     label: "Usuarios",
     description: "Gestionar usuarios del chatbot",
+    modulo: "usuarios",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
@@ -46,6 +51,7 @@ const menuItems: NavMenuItem[] = [
     href: "/registros",
     label: "Registros",
     description: "Ver historial de consultas",
+    modulo: "movimientos",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z" />
@@ -56,6 +62,7 @@ const menuItems: NavMenuItem[] = [
     href: "/tarifas",
     label: "Tarifas",
     description: "Gestionar tarifas de transporte",
+    modulo: "tarifas",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
@@ -68,6 +75,26 @@ export default function NavMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const { usuario } = useAuth();
+
+  // Filtrar items del menú según los módulos del usuario
+  const menuItemsFiltrados = useMemo(() => {
+    if (!usuario) return [];
+
+    // Los administradores ven todo
+    if (usuario.tipousuario === "Administrador") {
+      return menuItems;
+    }
+
+    // Filtrar según los módulos asignados
+    const modulosUsuario = usuario.modulos || [];
+    return menuItems.filter((item) => {
+      // Si el item no requiere módulo específico, siempre visible
+      if (item.modulo === null) return true;
+      // Verificar si el usuario tiene acceso al módulo
+      return modulosUsuario.includes(item.modulo);
+    });
+  }, [usuario]);
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
@@ -86,7 +113,12 @@ export default function NavMenu() {
     setIsOpen(false);
   }, [pathname]);
 
-  const currentPage = menuItems.find((item) => item.href === pathname) || menuItems[0];
+  // Si no hay items visibles, no mostrar el menú
+  if (menuItemsFiltrados.length === 0) {
+    return null;
+  }
+
+  const currentPage = menuItemsFiltrados.find((item) => item.href === pathname) || menuItemsFiltrados[0];
 
   return (
     <div className="nav-menu-container" ref={menuRef}>
@@ -112,7 +144,7 @@ export default function NavMenu() {
           <span>Navegar a</span>
         </div>
         <div className="nav-menu-items">
-          {menuItems.map((item) => (
+          {menuItemsFiltrados.map((item) => (
             <Link
               key={item.href}
               href={item.href}

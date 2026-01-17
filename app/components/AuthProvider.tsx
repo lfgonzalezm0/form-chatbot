@@ -10,6 +10,7 @@ interface Usuario {
   usuario: string;
   correo: string | null;
   telefono: string | null;
+  modulos: string[];
 }
 
 interface AuthContextType {

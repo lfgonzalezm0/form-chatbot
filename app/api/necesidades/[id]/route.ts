@@ -92,18 +92,34 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { categoria, necesidad, descripcion, habilitado } = body;
+    const { categoria, necesidad, descripcion, habilitado, telefonocaso } = body;
 
-    const result = await pool.query(
-      `UPDATE necesidadessystem
-       SET categoria = COALESCE($2, categoria),
-           necesidad = COALESCE($3, necesidad),
-           descripcion = $4,
-           habilitado = COALESCE($5, habilitado)
-       WHERE id = $1
-       RETURNING *`,
-      [id, categoria, necesidad, descripcion ?? null, habilitado]
-    );
+    // Solo admin puede cambiar telefonocaso
+    let result;
+    if (esAdmin && telefonocaso !== undefined) {
+      result = await pool.query(
+        `UPDATE necesidadessystem
+         SET categoria = COALESCE($2, categoria),
+             necesidad = COALESCE($3, necesidad),
+             descripcion = $4,
+             habilitado = COALESCE($5, habilitado),
+             telefonocaso = $6
+         WHERE id = $1
+         RETURNING *`,
+        [id, categoria, necesidad, descripcion ?? null, habilitado, telefonocaso]
+      );
+    } else {
+      result = await pool.query(
+        `UPDATE necesidadessystem
+         SET categoria = COALESCE($2, categoria),
+             necesidad = COALESCE($3, necesidad),
+             descripcion = $4,
+             habilitado = COALESCE($5, habilitado)
+         WHERE id = $1
+         RETURNING *`,
+        [id, categoria, necesidad, descripcion ?? null, habilitado]
+      );
+    }
 
     return NextResponse.json(result.rows[0]);
   } catch (error) {

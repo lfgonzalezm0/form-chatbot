@@ -26,45 +26,69 @@ export async function GET(req: NextRequest) {
     const categoria = searchParams.get("categoria");
     const necesidad = searchParams.get("necesidad");
 
-    let query = `
-      SELECT
-        id,
-        telefonocaso,
-        categoria,
-        necesidad,
-        pregunta,
-        respuesta,
-        variante,
-        urlimagen,
-        videourl
-      FROM preguntassystem
-      WHERE 1=1
-    `;
-
     const params: (string | number)[] = [];
     let paramIndex = 1;
+    let baseSelect: string;
+    let baseFrom: string;
 
-    // Filtro por telefonocaso si no es admin
-    if (!esAdmin && session.telefono) {
-      query += ` AND telefonocaso = $${paramIndex}`;
+    if (esAdmin) {
+      // Admin ve todas las preguntas con info de la cuenta
+      baseSelect = `
+        SELECT
+          p.id,
+          p.telefonocaso,
+          p.categoria,
+          p.necesidad,
+          p.pregunta,
+          p.respuesta,
+          p.variante,
+          p.urlimagen,
+          p.videourl,
+          c.nombre as cuenta_nombre
+      `;
+      baseFrom = `
+        FROM preguntassystem p
+        LEFT JOIN cuentassystem c ON p.telefonocaso = c.telefono
+        WHERE 1=1
+      `;
+    } else {
+      // Usuario normal solo ve sus preguntas
+      baseSelect = `
+        SELECT
+          id,
+          telefonocaso,
+          categoria,
+          necesidad,
+          pregunta,
+          respuesta,
+          variante,
+          urlimagen,
+          videourl
+      `;
+      baseFrom = `
+        FROM preguntassystem
+        WHERE telefonocaso = $${paramIndex}
+      `;
       params.push(session.telefono);
       paramIndex++;
     }
 
+    let query = baseSelect + baseFrom;
+
     // Filtro por categoría y necesidad
     if (categoria) {
-      query += ` AND categoria = $${paramIndex}`;
+      query += ` AND ${esAdmin ? 'p.' : ''}categoria = $${paramIndex}`;
       params.push(categoria);
       paramIndex++;
     }
 
     if (necesidad) {
-      query += ` AND necesidad = $${paramIndex}`;
+      query += ` AND ${esAdmin ? 'p.' : ''}necesidad = $${paramIndex}`;
       params.push(necesidad);
       paramIndex++;
     }
 
-    query += ` ORDER BY categoria ASC, necesidad ASC, pregunta ASC`;
+    query += ` ORDER BY ${esAdmin ? 'p.' : ''}categoria ASC, ${esAdmin ? 'p.' : ''}necesidad ASC, ${esAdmin ? 'p.' : ''}pregunta ASC`;
 
     const result = await pool.query(query, params);
 

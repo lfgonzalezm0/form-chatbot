@@ -20,25 +20,40 @@ export async function GET() {
     const session = JSON.parse(sessionCookie.value);
     const esAdmin = session.tipousuario === "Administrador";
 
-    let query = `
-      SELECT
-        id,
-        telefonocaso,
-        categoria,
-        necesidad,
-        descripcion,
-        habilitado
-      FROM necesidadessystem
-    `;
-
+    let query: string;
     const params: string[] = [];
 
-    if (!esAdmin && session.telefono) {
-      query += ` WHERE telefonocaso = $1`;
+    if (esAdmin) {
+      // Admin ve todas las necesidades con info de la cuenta
+      query = `
+        SELECT
+          n.id,
+          n.telefonocaso,
+          n.categoria,
+          n.necesidad,
+          n.descripcion,
+          n.habilitado,
+          c.nombre as cuenta_nombre
+        FROM necesidadessystem n
+        LEFT JOIN cuentassystem c ON n.telefonocaso = c.telefono
+        ORDER BY n.categoria ASC, n.necesidad ASC
+      `;
+    } else {
+      // Usuario normal solo ve sus necesidades
+      query = `
+        SELECT
+          id,
+          telefonocaso,
+          categoria,
+          necesidad,
+          descripcion,
+          habilitado
+        FROM necesidadessystem
+        WHERE telefonocaso = $1
+        ORDER BY categoria ASC, necesidad ASC
+      `;
       params.push(session.telefono);
     }
-
-    query += ` ORDER BY categoria ASC, necesidad ASC`;
 
     const result = await pool.query(query, params);
 
