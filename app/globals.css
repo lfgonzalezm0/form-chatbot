@@ -2760,22 +2760,22 @@ body {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
   z-index: 1000;
-  overflow-y: auto;
 }
 
 .modal-content {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background-color: white;
   border-radius: 12px;
-  width: calc(100% - 40px);
+  width: 100%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
   z-index: 1001;
 }
 
@@ -4444,7 +4444,7 @@ video.media-preview-full {
   }
 
   .modal-content {
-    width: calc(100% - 20px);
+    margin: 10px;
   }
 }
 
@@ -4693,11 +4693,11 @@ textarea {
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) translateY(20px) scale(0.95);
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) translateY(0) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -5077,7 +5077,325 @@ textarea {
   height: 20px;
 }
 
-/* Modal tarifa - estilos removidos, usar modal-content base */
+/* ============================================
+   PANEL LATERAL TARIFAS
+   ============================================ */
+.tarifas-contenedor-principal {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.tarifas-tabla-container.con-panel {
+  margin-right: 380px;
+  transition: margin-right 0.3s ease;
+}
+
+.tarifas-panel-lateral {
+  position: absolute;
+  top: 0;
+  right: -380px;
+  width: 380px;
+  height: 100%;
+  background-color: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.tarifas-panel-lateral.abierto {
+  right: 0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #075e54;
+  color: white;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.panel-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.panel-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.panel-close svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
+.panel-form {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.panel-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.panel-error svg {
+  width: 20px;
+  height: 20px;
+  color: #c62828;
+  flex-shrink: 0;
+}
+
+.panel-error span {
+  font-size: 13px;
+  color: #c62828;
+}
+
+.panel-field {
+  margin-bottom: 16px;
+}
+
+.panel-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.panel-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.panel-field input:focus {
+  border-color: #075e54;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 8px;
+}
+
+.panel-actions .btn-cancelar {
+  flex: 1;
+  padding: 10px 16px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.panel-actions .btn-cancelar:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+}
+
+.panel-actions .btn-guardar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  background-color: #075e54;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.panel-actions .btn-guardar:hover:not(:disabled) {
+  background-color: #064e46;
+}
+
+.panel-actions .btn-guardar:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.panel-actions .btn-guardar svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Fila seleccionada en tabla */
+.tarifas-tabla tbody tr.fila-seleccionada {
+  background-color: #e8f5e9;
+}
+
+/* Confirmación eliminar inline */
+.tarifas-confirmar-eliminar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff3e0;
+  border-top: 2px solid #ff9800;
+  padding: 16px 24px;
+  z-index: 20;
+  animation: slideInUp 0.2s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.confirmar-contenido {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.icono-warning {
+  width: 32px;
+  height: 32px;
+  color: #e65100;
+  flex-shrink: 0;
+}
+
+.confirmar-texto {
+  flex: 1;
+}
+
+.confirmar-texto p {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.confirmar-texto .warning-text {
+  font-size: 12px;
+  color: #666;
+}
+
+.confirmar-botones {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cancelar-sm {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancelar-sm:hover {
+  background-color: #f5f5f5;
+}
+
+.btn-eliminar-sm {
+  padding: 8px 16px;
+  border: none;
+  background-color: #d32f2f;
+  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-eliminar-sm:hover:not(:disabled) {
+  background-color: #b71c1c;
+}
+
+.btn-eliminar-sm:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive panel lateral */
+@media (max-width: 900px) {
+  .tarifas-contenedor-principal {
+    flex-direction: column;
+  }
+
+  .tarifas-tabla-container.con-panel {
+    margin-right: 0;
+  }
+
+  .tarifas-panel-lateral {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    border-radius: 16px 16px 0 0;
+    transform: translateY(100%);
+  }
+
+  .tarifas-panel-lateral.abierto {
+    right: 0;
+    transform: translateY(0);
+  }
+
+  .confirmar-contenido {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .confirmar-botones {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
 /* ============================================
    MODULOS EN CUENTAS

@@ -23,8 +23,8 @@ export default function TarifasPage() {
   const [filtroDestino, setFiltroDestino] = useState("");
   const [filtroCiudad, setFiltroCiudad] = useState("todas");
 
-  // Modal
-  const [modalAbierto, setModalAbierto] = useState(false);
+  // Panel lateral
+  const [panelAbierto, setPanelAbierto] = useState(false);
   const [tarifaEditando, setTarifaEditando] = useState<Tarifa | null>(null);
   const [formData, setFormData] = useState({
     origen: "",
@@ -107,8 +107,8 @@ export default function TarifasPage() {
   // Obtener ciudades únicas
   const ciudadesUnicas = [...new Set(tarifas.map((t) => t.ciudad_destino))].sort();
 
-  // Abrir modal para crear
-  const abrirModalCrear = () => {
+  // Abrir panel para crear
+  const abrirPanelCrear = () => {
     setTarifaEditando(null);
     setFormData({
       origen: "",
@@ -117,11 +117,11 @@ export default function TarifasPage() {
       precio: "",
     });
     setErrorForm(null);
-    setModalAbierto(true);
+    setPanelAbierto(true);
   };
 
-  // Abrir modal para editar
-  const abrirModalEditar = (tarifa: Tarifa) => {
+  // Abrir panel para editar
+  const abrirPanelEditar = (tarifa: Tarifa) => {
     setTarifaEditando(tarifa);
     setFormData({
       origen: tarifa.origen,
@@ -130,7 +130,14 @@ export default function TarifasPage() {
       precio: tarifa.precio.toString(),
     });
     setErrorForm(null);
-    setModalAbierto(true);
+    setPanelAbierto(true);
+  };
+
+  // Cerrar panel
+  const cerrarPanel = () => {
+    setPanelAbierto(false);
+    setTarifaEditando(null);
+    setErrorForm(null);
   };
 
   // Guardar tarifa
@@ -161,7 +168,7 @@ export default function TarifasPage() {
         return;
       }
 
-      setModalAbierto(false);
+      cerrarPanel();
       fetchTarifas();
       mostrarMensaje(tarifaEditando ? "Tarifa actualizada" : "Tarifa creada");
     } catch {
@@ -287,7 +294,7 @@ export default function TarifasPage() {
             <button className="btn-limpiar" onClick={limpiarFiltros}>
               Limpiar filtros
             </button>
-            <button className="btn-crear-tarifa" onClick={abrirModalCrear}>
+            <button className="btn-crear-tarifa" onClick={abrirPanelCrear}>
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
               </svg>
@@ -297,201 +304,179 @@ export default function TarifasPage() {
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="tarifas-tabla-container">
-        <table className="tarifas-tabla">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Origen</th>
-              <th>Destino</th>
-              <th>Ciudad Destino</th>
-              <th>Precio</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tarifasFiltradas.length === 0 ? (
+      {/* Contenedor principal con tabla y panel */}
+      <div className="tarifas-contenedor-principal">
+        {/* Tabla */}
+        <div className={`tarifas-tabla-container ${panelAbierto ? 'con-panel' : ''}`}>
+          <table className="tarifas-tabla">
+            <thead>
               <tr>
-                <td colSpan={6} className="tabla-vacia">
-                  No se encontraron tarifas
-                </td>
+                <th>ID</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Ciudad Destino</th>
+                <th>Precio</th>
+                <th>Acciones</th>
               </tr>
-            ) : (
-              tarifasFiltradas.map((tarifa) => (
-                <tr key={tarifa.id}>
-                  <td className="col-id">{tarifa.id}</td>
-                  <td>{tarifa.origen}</td>
-                  <td>{tarifa.destino}</td>
-                  <td>
-                    <span className="badge-ciudad">{tarifa.ciudad_destino}</span>
-                  </td>
-                  <td className="col-precio">${Number(tarifa.precio).toFixed(2)}</td>
-                  <td className="col-acciones">
-                    <button
-                      className="btn-accion editar"
-                      onClick={() => abrirModalEditar(tarifa)}
-                      title="Editar"
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                      </svg>
-                    </button>
-                    <button
-                      className="btn-accion eliminar"
-                      onClick={() => setConfirmandoEliminar(tarifa)}
-                      title="Eliminar"
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                      </svg>
-                    </button>
+            </thead>
+            <tbody>
+              {tarifasFiltradas.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="tabla-vacia">
+                    No se encontraron tarifas
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Modal crear/editar */}
-      {modalAbierto && (
-        <div className="modal-overlay" onClick={() => setModalAbierto(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{tarifaEditando ? "Editar tarifa" : "Nueva tarifa"}</h2>
-              <button onClick={() => setModalAbierto(false)} className="modal-close">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={guardarTarifa} className="modal-form">
-              {errorForm && (
-                <div className="modal-error">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                  </svg>
-                  <span>{errorForm}</span>
-                </div>
+              ) : (
+                tarifasFiltradas.map((tarifa) => (
+                  <tr key={tarifa.id} className={tarifaEditando?.id === tarifa.id ? 'fila-seleccionada' : ''}>
+                    <td className="col-id">{tarifa.id}</td>
+                    <td>{tarifa.origen}</td>
+                    <td>{tarifa.destino}</td>
+                    <td>
+                      <span className="badge-ciudad">{tarifa.ciudad_destino}</span>
+                    </td>
+                    <td className="col-precio">${Number(tarifa.precio).toFixed(2)}</td>
+                    <td className="col-acciones">
+                      <button
+                        className="btn-accion editar"
+                        onClick={() => abrirPanelEditar(tarifa)}
+                        title="Editar"
+                      >
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                      </button>
+                      <button
+                        className="btn-accion eliminar"
+                        onClick={() => setConfirmandoEliminar(tarifa)}
+                        title="Eliminar"
+                      >
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))
               )}
-
-              <div className="form-field">
-                <label>Origen *</label>
-                <input
-                  type="text"
-                  value={formData.origen}
-                  onChange={(e) => setFormData({ ...formData, origen: e.target.value })}
-                  placeholder="Ej: Norte de Quito"
-                  required
-                />
-              </div>
-
-              <div className="form-field">
-                <label>Destino *</label>
-                <input
-                  type="text"
-                  value={formData.destino}
-                  onChange={(e) => setFormData({ ...formData, destino: e.target.value })}
-                  placeholder="Ej: Sector centro de Ibarra"
-                  required
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Ciudad destino *</label>
-                  <input
-                    type="text"
-                    value={formData.ciudad_destino}
-                    onChange={(e) => setFormData({ ...formData, ciudad_destino: e.target.value })}
-                    placeholder="Ej: Ibarra"
-                    required
-                    list="ciudades-lista"
-                  />
-                  <datalist id="ciudades-lista">
-                    {ciudadesUnicas.map((ciudad) => (
-                      <option key={ciudad} value={ciudad} />
-                    ))}
-                  </datalist>
-                </div>
-
-                <div className="form-field">
-                  <label>Precio ($) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.precio}
-                    onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
-                    placeholder="Ej: 25.00"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button type="button" onClick={() => setModalAbierto(false)} className="btn-cancelar">
-                  Cancelar
-                </button>
-                <button type="submit" className="btn-guardar" disabled={guardando}>
-                  {guardando ? (
-                    <>
-                      <div className="btn-spinner"></div>
-                      Guardando...
-                    </>
-                  ) : (
-                    <>
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-                      </svg>
-                      {tarifaEditando ? "Guardar cambios" : "Crear tarifa"}
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
+            </tbody>
+          </table>
         </div>
-      )}
 
-      {/* Modal confirmar eliminar */}
-      {confirmandoEliminar && (
-        <div className="modal-overlay" onClick={() => setConfirmandoEliminar(null)}>
-          <div className="modal-content modal-sm" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header danger">
-              <h2>Eliminar tarifa</h2>
-              <button onClick={() => setConfirmandoEliminar(null)} className="modal-close">
+        {/* Panel lateral para crear/editar */}
+        <div className={`tarifas-panel-lateral ${panelAbierto ? 'abierto' : ''}`}>
+          <div className="panel-header">
+            <h2>{tarifaEditando ? "Editar tarifa" : "Nueva tarifa"}</h2>
+            <button onClick={cerrarPanel} className="panel-close">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+              </svg>
+            </button>
+          </div>
+
+          <form onSubmit={guardarTarifa} className="panel-form">
+            {errorForm && (
+              <div className="panel-error">
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                 </svg>
-              </button>
+                <span>{errorForm}</span>
+              </div>
+            )}
+
+            <div className="panel-field">
+              <label>Origen *</label>
+              <input
+                type="text"
+                value={formData.origen}
+                onChange={(e) => setFormData({ ...formData, origen: e.target.value })}
+                placeholder="Ej: Norte de Quito"
+                required
+              />
             </div>
 
-            <div className="modal-body">
-              <p>¿Está seguro que desea eliminar la tarifa de <strong>{confirmandoEliminar.origen}</strong> a <strong>{confirmandoEliminar.destino}</strong>?</p>
-              <p className="warning-text">Esta acción no se puede deshacer.</p>
+            <div className="panel-field">
+              <label>Destino *</label>
+              <input
+                type="text"
+                value={formData.destino}
+                onChange={(e) => setFormData({ ...formData, destino: e.target.value })}
+                placeholder="Ej: Sector centro de Ibarra"
+                required
+              />
             </div>
 
-            <div className="modal-actions">
-              <button onClick={() => setConfirmandoEliminar(null)} className="btn-cancelar">
+            <div className="panel-field">
+              <label>Ciudad destino *</label>
+              <input
+                type="text"
+                value={formData.ciudad_destino}
+                onChange={(e) => setFormData({ ...formData, ciudad_destino: e.target.value })}
+                placeholder="Ej: Ibarra"
+                required
+                list="ciudades-lista"
+              />
+              <datalist id="ciudades-lista">
+                {ciudadesUnicas.map((ciudad) => (
+                  <option key={ciudad} value={ciudad} />
+                ))}
+              </datalist>
+            </div>
+
+            <div className="panel-field">
+              <label>Precio ($) *</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.precio}
+                onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
+                placeholder="Ej: 25.00"
+                required
+              />
+            </div>
+
+            <div className="panel-actions">
+              <button type="button" onClick={cerrarPanel} className="btn-cancelar">
                 Cancelar
               </button>
-              <button onClick={eliminarTarifa} className="btn-eliminar" disabled={guardando}>
+              <button type="submit" className="btn-guardar" disabled={guardando}>
                 {guardando ? (
                   <>
                     <div className="btn-spinner"></div>
-                    Eliminando...
+                    Guardando...
                   </>
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                      <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
                     </svg>
-                    Eliminar
+                    {tarifaEditando ? "Guardar cambios" : "Crear tarifa"}
                   </>
                 )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Confirmación eliminar inline */}
+      {confirmandoEliminar && (
+        <div className="tarifas-confirmar-eliminar">
+          <div className="confirmar-contenido">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="icono-warning">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            <div className="confirmar-texto">
+              <p>¿Eliminar tarifa de <strong>{confirmandoEliminar.origen}</strong> a <strong>{confirmandoEliminar.destino}</strong>?</p>
+              <span className="warning-text">Esta acción no se puede deshacer.</span>
+            </div>
+            <div className="confirmar-botones">
+              <button onClick={() => setConfirmandoEliminar(null)} className="btn-cancelar-sm">
+                Cancelar
+              </button>
+              <button onClick={eliminarTarifa} className="btn-eliminar-sm" disabled={guardando}>
+                {guardando ? "Eliminando..." : "Eliminar"}
               </button>
             </div>
           </div>
