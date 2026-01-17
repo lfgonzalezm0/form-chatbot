@@ -5410,6 +5410,142 @@ textarea {
 }
 
 /* ============================================
+   PANEL DE REFERENCIAS EN TARIFAS
+   ============================================ */
+.referencias-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.referencia-item {
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.referencia-item:hover {
+  background-color: #f0f0f0;
+  border-color: #ccc;
+}
+
+.referencia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.referencia-destino {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.referencia-ciudad {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.referencia-cantidad {
+  font-size: 11px;
+  color: #888;
+  background-color: #e0e0e0;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.referencia-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.referencia-input-group input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.referencia-input-group input:focus {
+  border-color: #075e54;
+}
+
+.referencia-input-group input::placeholder {
+  color: #aaa;
+}
+
+.btn-guardar-ref {
+  padding: 8px 14px;
+  background-color: #075e54;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-guardar-ref:hover {
+  background-color: #064e46;
+}
+
+.btn-guardar-ref:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.badge-referencia {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.sin-referencia {
+  color: #aaa;
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* Botón de referencias en la barra de acciones */
+.btn-referencias {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-referencias:hover {
+  background-color: #bbdefb;
+  border-color: #64b5f6;
+}
+
+.btn-referencias svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
    MODULOS EN CUENTAS
    ============================================ */
 /* Badges de módulos en la tabla */

@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
     const session = verificacion.session;
     const esAdmin = session.tipousuario === "Administrador";
 
-    let query = `SELECT id, origen, destino, ciudad_destino, precio, telefonocaso FROM tarifas_transporte`;
+    let query = `SELECT id, origen, destino, ciudad_destino, precio, referencia, telefonocaso FROM tarifas_transporte`;
     const conditions: string[] = [];
     const params: (string | null)[] = [];
     let paramCount = 1;
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { origen, destino, ciudad_destino, precio } = body;
+    const { origen, destino, ciudad_destino, precio, referencia } = body;
 
     if (!origen || !destino || !ciudad_destino || precio === undefined) {
       return NextResponse.json(
@@ -117,10 +117,10 @@ export async function POST(req: NextRequest) {
     const telefonocaso = session.telefono || null;
 
     const result = await pool.query(
-      `INSERT INTO tarifas_transporte (origen, destino, ciudad_destino, precio, telefonocaso)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO tarifas_transporte (origen, destino, ciudad_destino, precio, referencia, telefonocaso)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [origen, destino, ciudad_destino, precio, telefonocaso]
+      [origen, destino, ciudad_destino, precio, referencia || null, telefonocaso]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });

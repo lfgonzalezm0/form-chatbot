@@ -9,6 +9,14 @@ interface Tarifa {
   destino: string;
   ciudad_destino: string;
   precio: number;
+  referencia: string | null;
+}
+
+interface DestinoUnico {
+  destino: string;
+  ciudad_destino: string;
+  referencia: string | null;
+  cantidad: number;
 }
 
 export default function TarifasPage() {
@@ -31,6 +39,7 @@ export default function TarifasPage() {
     destino: "",
     ciudad_destino: "",
     precio: "",
+    referencia: "",
   });
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
@@ -39,6 +48,13 @@ export default function TarifasPage() {
 
   // Mensaje
   const [mensaje, setMensaje] = useState<string | null>(null);
+
+  // Panel de referencias por destino
+  const [panelReferencias, setPanelReferencias] = useState(false);
+  const [destinosUnicos, setDestinosUnicos] = useState<DestinoUnico[]>([]);
+  const [cargandoDestinos, setCargandoDestinos] = useState(false);
+  const [destinoSeleccionado, setDestinoSeleccionado] = useState<DestinoUnico | null>(null);
+  const [nuevaReferencia, setNuevaReferencia] = useState("");
 
   useEffect(() => {
     fetchTarifas();
@@ -115,6 +131,7 @@ export default function TarifasPage() {
       destino: "",
       ciudad_destino: "",
       precio: "",
+      referencia: "",
     });
     setErrorForm(null);
     setPanelAbierto(true);
@@ -128,9 +145,79 @@ export default function TarifasPage() {
       destino: tarifa.destino,
       ciudad_destino: tarifa.ciudad_destino,
       precio: tarifa.precio.toString(),
+      referencia: tarifa.referencia || "",
     });
     setErrorForm(null);
     setPanelAbierto(true);
+  };
+
+  // Cargar destinos únicos
+  const fetchDestinosUnicos = async () => {
+    try {
+      setCargandoDestinos(true);
+      const res = await fetch("/api/tarifas/destinos");
+      if (res.ok) {
+        const data = await res.json();
+        setDestinosUnicos(data);
+      }
+    } catch (err) {
+      console.error("Error al cargar destinos:", err);
+    } finally {
+      setCargandoDestinos(false);
+    }
+  };
+
+  // Abrir panel de referencias
+  const abrirPanelReferencias = () => {
+    fetchDestinosUnicos();
+    setPanelReferencias(true);
+    setPanelAbierto(false);
+  };
+
+  // Cerrar panel de referencias
+  const cerrarPanelReferencias = () => {
+    setPanelReferencias(false);
+    setDestinoSeleccionado(null);
+    setNuevaReferencia("");
+  };
+
+  // Seleccionar destino para editar referencia
+  const seleccionarDestino = (destino: DestinoUnico) => {
+    setDestinoSeleccionado(destino);
+    setNuevaReferencia(destino.referencia || "");
+  };
+
+  // Guardar referencia para un destino
+  const guardarReferenciaPorDestino = async () => {
+    if (!destinoSeleccionado) return;
+    setGuardando(true);
+
+    try {
+      const res = await fetch("/api/tarifas/destinos/referencia", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          destino: destinoSeleccionado.destino,
+          referencia: nuevaReferencia || null,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        mostrarMensaje(`Referencia actualizada en ${data.actualizados} tarifas`);
+        fetchDestinosUnicos();
+        fetchTarifas();
+        setDestinoSeleccionado(null);
+        setNuevaReferencia("");
+      } else {
+        const data = await res.json();
+        mostrarMensaje(data.error || "Error al actualizar");
+      }
+    } catch {
+      mostrarMensaje("Error de conexión");
+    } finally {
+      setGuardando(false);
+    }
   };
 
   // Cerrar panel
@@ -294,6 +381,12 @@ export default function TarifasPage() {
             <button className="btn-limpiar" onClick={limpiarFiltros}>
               Limpiar filtros
             </button>
+            <button className="btn-referencias" onClick={abrirPanelReferencias}>
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
+              </svg>
+              Referencias
+            </button>
             <button className="btn-crear-tarifa" onClick={abrirPanelCrear}>
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
@@ -315,6 +408,7 @@ export default function TarifasPage() {
                 <th>Origen</th>
                 <th>Destino</th>
                 <th>Ciudad Destino</th>
+                <th>Referencia</th>
                 <th>Precio</th>
                 <th>Acciones</th>
               </tr>
@@ -322,7 +416,7 @@ export default function TarifasPage() {
             <tbody>
               {tarifasFiltradas.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="tabla-vacia">
+                  <td colSpan={7} className="tabla-vacia">
                     No se encontraron tarifas
                   </td>
                 </tr>
@@ -334,6 +428,13 @@ export default function TarifasPage() {
                     <td>{tarifa.destino}</td>
                     <td>
                       <span className="badge-ciudad">{tarifa.ciudad_destino}</span>
+                    </td>
+                    <td className="col-referencia">
+                      {tarifa.referencia ? (
+                        <span className="badge-referencia">{tarifa.referencia}</span>
+                      ) : (
+                        <span className="sin-referencia">-</span>
+                      )}
                     </td>
                     <td className="col-precio">${Number(tarifa.precio).toFixed(2)}</td>
                     <td className="col-acciones">
@@ -436,6 +537,16 @@ export default function TarifasPage() {
               />
             </div>
 
+            <div className="panel-field">
+              <label>Referencia</label>
+              <input
+                type="text"
+                value={formData.referencia}
+                onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
+                placeholder="Ej: REF-001, Zona Norte, etc."
+              />
+            </div>
+
             <div className="panel-actions">
               <button type="button" onClick={cerrarPanel} className="btn-cancelar">
                 Cancelar
@@ -482,6 +593,99 @@ export default function TarifasPage() {
           </div>
         </div>
       )}
+
+      {/* Panel de referencias por destino */}
+      <div className={`tarifas-panel-lateral panel-referencias ${panelReferencias ? 'abierto' : ''}`}>
+        <div className="panel-header">
+          <h2>Referencias por Destino</h2>
+          <button onClick={cerrarPanelReferencias} className="panel-close">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="panel-referencias-contenido">
+          {cargandoDestinos ? (
+            <div className="panel-cargando">
+              <div className="loading-spinner"></div>
+              <p>Cargando destinos...</p>
+            </div>
+          ) : (
+            <>
+              <p className="panel-descripcion">
+                Selecciona un destino para asignar o modificar su referencia.
+                La referencia se actualizará en todas las tarifas con ese destino.
+              </p>
+
+              <div className="destinos-lista">
+                {destinosUnicos.length === 0 ? (
+                  <p className="sin-destinos">No hay destinos disponibles</p>
+                ) : (
+                  destinosUnicos.map((destino, index) => (
+                    <div
+                      key={index}
+                      className={`destino-item ${destinoSeleccionado?.destino === destino.destino ? 'seleccionado' : ''}`}
+                      onClick={() => seleccionarDestino(destino)}
+                    >
+                      <div className="destino-info">
+                        <span className="destino-nombre">{destino.destino}</span>
+                        <span className="destino-ciudad">{destino.ciudad_destino}</span>
+                      </div>
+                      <div className="destino-meta">
+                        {destino.referencia ? (
+                          <span className="badge-referencia">{destino.referencia}</span>
+                        ) : (
+                          <span className="sin-referencia-tag">Sin referencia</span>
+                        )}
+                        <span className="destino-cantidad">{destino.cantidad} tarifas</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {destinoSeleccionado && (
+                <div className="editar-referencia-form">
+                  <div className="editar-referencia-header">
+                    <strong>Editar referencia para:</strong>
+                    <span>{destinoSeleccionado.destino}</span>
+                  </div>
+                  <div className="panel-field">
+                    <label>Nueva referencia</label>
+                    <input
+                      type="text"
+                      value={nuevaReferencia}
+                      onChange={(e) => setNuevaReferencia(e.target.value)}
+                      placeholder="Ej: REF-001, Zona Norte, etc."
+                    />
+                  </div>
+                  <div className="panel-actions">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDestinoSeleccionado(null);
+                        setNuevaReferencia("");
+                      }}
+                      className="btn-cancelar"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={guardarReferenciaPorDestino}
+                      className="btn-guardar"
+                      disabled={guardando}
+                    >
+                      {guardando ? "Guardando..." : `Actualizar ${destinoSeleccionado.cantidad} tarifas`}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
