@@ -45,11 +45,19 @@ export async function GET(
     }
 
     const { id } = await params;
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
 
-    const result = await pool.query(
-      `SELECT * FROM tarifas_transporte WHERE id = $1`,
-      [id]
-    );
+    // Construir query con filtro de teléfono para no admins
+    let query = `SELECT * FROM tarifas_transporte WHERE id = $1`;
+    const queryParams: (string | number)[] = [id];
+
+    if (!esAdmin && session.telefono) {
+      query += ` AND telefonocaso = $2`;
+      queryParams.push(session.telefono);
+    }
+
+    const result = await pool.query(query, queryParams);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -86,16 +94,26 @@ export async function PUT(
     const body = await request.json();
     const { origen, destino, ciudad_destino, precio } = body;
 
-    const result = await pool.query(
-      `UPDATE tarifas_transporte
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
+
+    // Construir query con filtro de teléfono para no admins
+    let query = `UPDATE tarifas_transporte
        SET origen = COALESCE($2, origen),
            destino = COALESCE($3, destino),
            ciudad_destino = COALESCE($4, ciudad_destino),
            precio = COALESCE($5, precio)
-       WHERE id = $1
-       RETURNING *`,
-      [id, origen, destino, ciudad_destino, precio]
-    );
+       WHERE id = $1`;
+    const queryParams: (string | number | null)[] = [id, origen, destino, ciudad_destino, precio];
+
+    if (!esAdmin && session.telefono) {
+      query += ` AND telefonocaso = $6`;
+      queryParams.push(session.telefono);
+    }
+
+    query += ` RETURNING *`;
+
+    const result = await pool.query(query, queryParams);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -129,11 +147,21 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
 
-    const result = await pool.query(
-      `DELETE FROM tarifas_transporte WHERE id = $1 RETURNING id`,
-      [id]
-    );
+    // Construir query con filtro de teléfono para no admins
+    let query = `DELETE FROM tarifas_transporte WHERE id = $1`;
+    const queryParams: (string | number)[] = [id];
+
+    if (!esAdmin && session.telefono) {
+      query += ` AND telefonocaso = $2`;
+      queryParams.push(session.telefono);
+    }
+
+    query += ` RETURNING id`;
+
+    const result = await pool.query(query, queryParams);
 
     if (result.rows.length === 0) {
       return NextResponse.json(

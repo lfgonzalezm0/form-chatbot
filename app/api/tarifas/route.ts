@@ -46,10 +46,19 @@ export async function GET(req: NextRequest) {
     const destino = searchParams.get("destino");
     const ciudad = searchParams.get("ciudad");
 
-    let query = `SELECT id, origen, destino, ciudad_destino, precio FROM tarifas_transporte`;
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
+
+    let query = `SELECT id, origen, destino, ciudad_destino, precio, telefonocaso FROM tarifas_transporte`;
     const conditions: string[] = [];
-    const params: string[] = [];
+    const params: (string | null)[] = [];
     let paramCount = 1;
+
+    // Filtro fijo por teléfono para usuarios no administradores
+    if (!esAdmin && session.telefono) {
+      conditions.push(`telefonocaso = $${paramCount++}`);
+      params.push(session.telefono);
+    }
 
     if (origen) {
       conditions.push(`origen ILIKE $${paramCount++}`);
@@ -103,11 +112,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Obtener el teléfono del usuario de la sesión
+    const session = verificacion.session;
+    const telefonocaso = session.telefono || null;
+
     const result = await pool.query(
-      `INSERT INTO tarifas_transporte (origen, destino, ciudad_destino, precio)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO tarifas_transporte (origen, destino, ciudad_destino, precio, telefonocaso)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [origen, destino, ciudad_destino, precio]
+      [origen, destino, ciudad_destino, precio, telefonocaso]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });
