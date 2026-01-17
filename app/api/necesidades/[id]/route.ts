@@ -94,6 +94,9 @@ export async function PUT(
     const body = await request.json();
     const { categoria, necesidad, descripcion, habilitado, telefonocaso } = body;
 
+    // Obtener la necesidad original para saber su nombre actual
+    const necesidadOriginal = checkResult.rows[0];
+
     // Solo admin puede cambiar telefonocaso
     let result;
     if (esAdmin && telefonocaso !== undefined) {
@@ -107,6 +110,17 @@ export async function PUT(
          WHERE id = $1
          RETURNING *`,
         [id, categoria, necesidad, descripcion ?? null, habilitado, telefonocaso]
+      );
+
+      // Actualizar automáticamente todas las preguntas asociadas a esta necesidad
+      const nombreNecesidad = necesidad || necesidadOriginal.necesidad;
+      const categoriaActual = categoria || necesidadOriginal.categoria;
+
+      await pool.query(
+        `UPDATE preguntassystem
+         SET telefonocaso = $1
+         WHERE necesidad = $2 AND categoria = $3`,
+        [telefonocaso, nombreNecesidad, categoriaActual]
       );
     } else {
       result = await pool.query(
