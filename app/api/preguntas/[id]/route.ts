@@ -95,13 +95,14 @@ export async function PUT(
     const { categoria, necesidad, pregunta, respuesta, variante, imagenUrl, videoUrl } = body;
 
     // Actualizar con las URLs directamente
+    // NOTA: variante NO usa COALESCE para permitir eliminar variantes (poner null o string vacío)
     const result = await pool.query(
       `UPDATE preguntassystem
        SET categoria = COALESCE($2, categoria),
            necesidad = COALESCE($3, necesidad),
            pregunta = COALESCE($4, pregunta),
            respuesta = COALESCE($5, respuesta),
-           variante = COALESCE($6, variante),
+           variante = $6,
            urlimagen = $7,
            videourl = $8
        WHERE id = $1

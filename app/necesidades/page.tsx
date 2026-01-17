@@ -817,85 +817,54 @@ export default function NecesidadesPage() {
                             </div>
                           </div>
                         )}
-                        {p.urlimagen && (
-                          <div className="pregunta-imagen">
-                            <img
-                              src={p.urlimagen}
-                              alt="Imagen adjunta"
-                              onClick={() => setMediaPreview({ tipo: "imagen", url: p.urlimagen! })}
-                              className="imagen-clickeable"
-                              title="Clic para ver en grande"
-                            />
-                            <div className="urlimagen-container">
-                              <span className="urlimagen-label">URL para WhatsApp:</span>
-                              <div className="urlimagen-copy">
-                                <input type="text" value={p.urlimagen} readOnly />
+                        {/* Fila de medios (imagen y/o video) */}
+                        {(p.urlimagen || p.videourl) && (
+                          <div className="pregunta-medios-row">
+                            {p.urlimagen && (
+                              <div className="pregunta-media-item">
+                                <img
+                                  src={p.urlimagen}
+                                  alt="Imagen adjunta"
+                                  onClick={() => setMediaPreview({ tipo: "imagen", url: p.urlimagen! })}
+                                  className="imagen-clickeable"
+                                  title="Clic para ver en grande"
+                                />
                                 <button
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(p.urlimagen || "");
-                                    mostrarMensaje("URL copiada al portapapeles");
-                                  }}
-                                  title="Copiar URL"
+                                  className="btn-eliminar-adjunto-mini"
+                                  onClick={() => eliminarAdjunto(p.id, "imagen")}
+                                  title="Eliminar imagen"
                                 >
                                   <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                                   </svg>
                                 </button>
                               </div>
-                            </div>
-                            <button
-                              className="btn-eliminar-adjunto"
-                              onClick={() => eliminarAdjunto(p.id, "imagen")}
-                              title="Eliminar imagen"
-                            >
-                              <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                              </svg>
-                              Eliminar imagen
-                            </button>
-                          </div>
-                        )}
-                        {p.videourl && (
-                          <div className="pregunta-video">
-                            <div
-                              className="video-thumbnail-container"
-                              onClick={() => setMediaPreview({ tipo: "video", url: p.videourl! })}
-                              title="Clic para ver en grande"
-                            >
-                              <video src={p.videourl} className="video-preview-card" muted />
-                              <div className="video-play-overlay">
-                                <svg viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M8 5v14l11-7z" />
-                                </svg>
-                              </div>
-                            </div>
-                            <div className="videourl-container">
-                              <span className="videourl-label">URL para WhatsApp:</span>
-                              <div className="videourl-copy">
-                                <input type="text" value={p.videourl} readOnly />
+                            )}
+                            {p.videourl && (
+                              <div className="pregunta-media-item">
+                                <div
+                                  className="video-thumbnail-container"
+                                  onClick={() => setMediaPreview({ tipo: "video", url: p.videourl! })}
+                                  title="Clic para ver en grande"
+                                >
+                                  <video src={p.videourl} className="video-preview-card" muted />
+                                  <div className="video-play-overlay">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                      <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                  </div>
+                                </div>
                                 <button
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(p.videourl || "");
-                                    mostrarMensaje("URL copiada al portapapeles");
-                                  }}
-                                  title="Copiar URL"
+                                  className="btn-eliminar-adjunto-mini"
+                                  onClick={() => eliminarAdjunto(p.id, "video")}
+                                  title="Eliminar video"
                                 >
                                   <svg viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                                   </svg>
                                 </button>
                               </div>
-                            </div>
-                            <button
-                              className="btn-eliminar-adjunto"
-                              onClick={() => eliminarAdjunto(p.id, "video")}
-                              title="Eliminar video"
-                            >
-                              <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                              </svg>
-                              Eliminar video
-                            </button>
+                            )}
                           </div>
                         )}
                       </div>
