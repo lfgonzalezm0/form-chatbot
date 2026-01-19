@@ -1,0 +1,74 @@
+import { NextResponse } from "next/server";
+import pool from "@/lib/db";
+import { cookies } from "next/headers";
+
+export const dynamic = "force-dynamic";
+
+// Verificar acceso al módulo de formularios
+async function verificarAcceso() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session");
+
+  if (!sessionCookie) {
+    return { autorizado: false, error: "No hay sesión activa" };
+  }
+
+  const session = JSON.parse(sessionCookie.value);
+
+  // Los administradores siempre tienen acceso
+  if (session.tipousuario === "Administrador") {
+    return { autorizado: true, session };
+  }
+
+  // Verificar si el usuario tiene el módulo de formularios
+  if (session.modulos && Array.isArray(session.modulos)) {
+    if (session.modulos.includes("formularios")) {
+      return { autorizado: true, session };
+    }
+  }
+
+  return { autorizado: false, error: "No tiene acceso al módulo de formularios" };
+}
+
+// GET - Obtener un formulario por ID
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const verificacion = await verificarAcceso();
+    if (!verificacion.autorizado) {
+      return NextResponse.json(
+        { error: verificacion.error },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await params;
+
+    const result = await pool.query(
+      `SELECT
+        id, telefono, nombre, cuenta, tiposolicitud,
+        cantidadfondos, cuentatransferencia, datosconversion,
+        guid, club, enlace, urlimagen, bancodeposito
+      FROM formdv0
+      WHERE id = $1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { error: "Formulario no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error al obtener formulario:", error);
+    return NextResponse.json(
+      { error: "Error al obtener formulario" },
+      { status: 500 }
+    );
+  }
+}
