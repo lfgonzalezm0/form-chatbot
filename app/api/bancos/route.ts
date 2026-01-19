@@ -44,10 +44,19 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const nombre = searchParams.get("nombre");
 
-    let query = `SELECT id, nombre, numerocuenta, tipocuenta, identificacion, correo, telefono, creado, modificado FROM bancosdv0`;
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
+
+    let query = `SELECT id, nombre, numerocuenta, tipocuenta, identificacion, correo, telefono, telefonocaso, creado, modificado FROM bancosdv0`;
     const conditions: string[] = [];
-    const params: string[] = [];
+    const params: (string | null)[] = [];
     let paramCount = 1;
+
+    // Filtro fijo por teléfono para usuarios no administradores
+    if (!esAdmin && session.telefono) {
+      conditions.push(`telefonocaso = $${paramCount++}`);
+      params.push(session.telefono);
+    }
 
     if (nombre) {
       conditions.push(`nombre ILIKE $${paramCount++}`);
@@ -115,10 +124,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar si ya existe un banco con el mismo número de cuenta
+    // Obtener el teléfono del usuario de la sesión
+    const session = verificacion.session;
+    const telefonocaso = session.telefono || null;
+
+    // Verificar si ya existe un banco con el mismo número de cuenta para este usuario
     const existente = await pool.query(
-      `SELECT id FROM bancosdv0 WHERE numerocuenta = $1`,
-      [numerocuenta.trim()]
+      `SELECT id FROM bancosdv0 WHERE numerocuenta = $1 AND (telefonocaso = $2 OR ($2 IS NULL AND telefonocaso IS NULL))`,
+      [numerocuenta.trim(), telefonocaso]
     );
 
     if (existente.rows.length > 0) {
@@ -129,8 +142,8 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await pool.query(
-      `INSERT INTO bancosdv0 (nombre, numerocuenta, tipocuenta, identificacion, correo, telefono)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO bancosdv0 (nombre, numerocuenta, tipocuenta, identificacion, correo, telefono, telefonocaso)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
         nombre.trim(),
@@ -138,7 +151,8 @@ export async function POST(req: NextRequest) {
         tipocuenta.trim(),
         identificacion.trim(),
         correo?.trim() || null,
-        telefono?.trim() || null
+        telefono?.trim() || null,
+        telefonocaso
       ]
     );
 

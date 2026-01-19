@@ -45,11 +45,19 @@ export async function GET(
     }
 
     const { id } = await params;
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
 
-    const result = await pool.query(
-      `SELECT * FROM bancosdv0 WHERE id = $1`,
-      [id]
-    );
+    // Construir query con filtro de teléfono para no admins
+    let query = `SELECT * FROM bancosdv0 WHERE id = $1`;
+    const queryParams: (string | number)[] = [id];
+
+    if (!esAdmin && session.telefono) {
+      query += ` AND telefonocaso = $2`;
+      queryParams.push(session.telefono);
+    }
+
+    const result = await pool.query(query, queryParams);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -115,11 +123,19 @@ export async function PUT(
       );
     }
 
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
+
     // Verificar si ya existe otro banco con el mismo número de cuenta
-    const existente = await pool.query(
-      `SELECT id FROM bancosdv0 WHERE numerocuenta = $1 AND id != $2`,
-      [numerocuenta.trim(), id]
-    );
+    let checkQuery = `SELECT id FROM bancosdv0 WHERE numerocuenta = $1 AND id != $2`;
+    const checkParams: (string | number)[] = [numerocuenta.trim(), id];
+
+    if (!esAdmin && session.telefono) {
+      checkQuery += ` AND telefonocaso = $3`;
+      checkParams.push(session.telefono);
+    }
+
+    const existente = await pool.query(checkQuery, checkParams);
 
     if (existente.rows.length > 0) {
       return NextResponse.json(
@@ -128,22 +144,29 @@ export async function PUT(
       );
     }
 
-    const result = await pool.query(
-      `UPDATE bancosdv0
+    // Construir query de actualización con filtro de teléfono para no admins
+    let query = `UPDATE bancosdv0
        SET nombre = $2, numerocuenta = $3, tipocuenta = $4, identificacion = $5,
            correo = $6, telefono = $7, modificado = CURRENT_TIMESTAMP
-       WHERE id = $1
-       RETURNING *`,
-      [
-        id,
-        nombre.trim(),
-        numerocuenta.trim(),
-        tipocuenta.trim(),
-        identificacion.trim(),
-        correo?.trim() || null,
-        telefono?.trim() || null
-      ]
-    );
+       WHERE id = $1`;
+    const queryParams: (string | number | null)[] = [
+      id,
+      nombre.trim(),
+      numerocuenta.trim(),
+      tipocuenta.trim(),
+      identificacion.trim(),
+      correo?.trim() || null,
+      telefono?.trim() || null
+    ];
+
+    if (!esAdmin && session.telefono) {
+      query += ` AND telefonocaso = $8`;
+      queryParams.push(session.telefono);
+    }
+
+    query += ` RETURNING *`;
+
+    const result = await pool.query(query, queryParams);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
@@ -177,11 +200,21 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const session = verificacion.session;
+    const esAdmin = session.tipousuario === "Administrador";
 
-    const result = await pool.query(
-      `DELETE FROM bancosdv0 WHERE id = $1 RETURNING id`,
-      [id]
-    );
+    // Construir query con filtro de teléfono para no admins
+    let query = `DELETE FROM bancosdv0 WHERE id = $1`;
+    const queryParams: (string | number)[] = [id];
+
+    if (!esAdmin && session.telefono) {
+      query += ` AND telefonocaso = $2`;
+      queryParams.push(session.telefono);
+    }
+
+    query += ` RETURNING id`;
+
+    const result = await pool.query(query, queryParams);
 
     if (result.rows.length === 0) {
       return NextResponse.json(
