@@ -377,7 +377,7 @@ export default function FormulariosPage() {
         .modal-header h2 {
           margin: 0;
           font-size: 1.25rem;
-          color: var(--text-primary, #fff);
+          color: var(--text-primary, #000000);
         }
 
         .modal-close {
