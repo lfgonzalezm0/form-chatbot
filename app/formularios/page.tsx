@@ -199,13 +199,14 @@ export default function FormulariosPage() {
                 <th>Monto</th>
                 <th>Club</th>
                 <th>Banco</th>
+                <th>Comprobante</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {formulariosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="tabla-vacia">
+                  <td colSpan={10} className="tabla-vacia">
                     No se encontraron formularios
                   </td>
                 </tr>
@@ -224,6 +225,34 @@ export default function FormulariosPage() {
                     <td className="col-monto">{formatearMonto(form.cantidadfondos)}</td>
                     <td>{form.club || "-"}</td>
                     <td>{form.bancodeposito || "-"}</td>
+                    <td className="col-comprobante">
+                      {form.urlimagen ? (
+                        <a
+                          href={form.urlimagen}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="thumbnail-link"
+                          title="Ver comprobante"
+                        >
+                          <img
+                            src={form.urlimagen}
+                            alt="Comprobante"
+                            className="thumbnail-img"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <span className="thumbnail-fallback hidden">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                            </svg>
+                          </span>
+                        </a>
+                      ) : (
+                        <span className="sin-comprobante">-</span>
+                      )}
+                    </td>
                     <td className="col-acciones">
                       <button
                         className="btn-accion ver"
@@ -234,19 +263,6 @@ export default function FormulariosPage() {
                           <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                         </svg>
                       </button>
-                      {form.urlimagen && (
-                        <a
-                          href={form.urlimagen}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn-accion imagen"
-                          title="Ver comprobante"
-                        >
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                          </svg>
-                        </a>
-                      )}
                     </td>
                   </tr>
                 ))
@@ -323,17 +339,26 @@ export default function FormulariosPage() {
               {formularioDetalle.urlimagen && (
                 <div className="detalle-seccion">
                   <h3>Comprobante</h3>
-                  <a
-                    href={formularioDetalle.urlimagen}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-ver-imagen"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                    </svg>
-                    Ver comprobante
-                  </a>
+                  <div className="comprobante-preview">
+                    <a
+                      href={formularioDetalle.urlimagen}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="comprobante-link"
+                    >
+                      <img
+                        src={formularioDetalle.urlimagen}
+                        alt="Comprobante"
+                        className="comprobante-img"
+                      />
+                      <div className="comprobante-overlay">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                        </svg>
+                        <span>Abrir imagen</span>
+                      </div>
+                    </a>
+                  </div>
                 </div>
               )}
             </div>
@@ -514,6 +539,101 @@ export default function FormulariosPage() {
         .col-monto {
           font-weight: 500;
           text-align: right;
+        }
+
+        .col-comprobante {
+          text-align: center;
+          width: 80px;
+        }
+
+        .thumbnail-link {
+          display: inline-block;
+          border-radius: 6px;
+          overflow: hidden;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .thumbnail-link:hover {
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .thumbnail-img {
+          width: 50px;
+          height: 50px;
+          object-fit: cover;
+          border-radius: 6px;
+          border: 2px solid var(--border-color, #2d2d44);
+        }
+
+        .thumbnail-fallback {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 50px;
+          height: 50px;
+          background: var(--bg-tertiary, #252540);
+          border-radius: 6px;
+          color: var(--text-secondary, #888);
+        }
+
+        .thumbnail-fallback svg {
+          width: 24px;
+          height: 24px;
+        }
+
+        .thumbnail-fallback.hidden {
+          display: none;
+        }
+
+        .sin-comprobante {
+          color: var(--text-secondary, #888);
+        }
+
+        .comprobante-preview {
+          margin-top: 8px;
+        }
+
+        .comprobante-link {
+          display: block;
+          position: relative;
+          border-radius: 8px;
+          overflow: hidden;
+          max-width: 100%;
+        }
+
+        .comprobante-img {
+          width: 100%;
+          max-height: 300px;
+          object-fit: contain;
+          background: var(--bg-tertiary, #252540);
+          border-radius: 8px;
+        }
+
+        .comprobante-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+          padding: 20px 12px 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          color: white;
+          font-size: 0.85rem;
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+
+        .comprobante-link:hover .comprobante-overlay {
+          opacity: 1;
+        }
+
+        .comprobante-overlay svg {
+          width: 18px;
+          height: 18px;
         }
 
         @media (max-width: 640px) {
