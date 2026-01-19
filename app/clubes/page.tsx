@@ -230,7 +230,7 @@ export default function ClubesPage() {
             <label>Buscar por nombre</label>
             <input
               type="text"
-              placeholder="Ej: Club Deportivo..."
+              placeholder="Buscar club..."
               value={filtroNombre}
               onChange={(e) => setFiltroNombre(e.target.value)}
             />
@@ -328,7 +328,7 @@ export default function ClubesPage() {
                 type="text"
                 value={formData.nombre}
                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                placeholder="Ej: Club Deportivo Norte"
+                placeholder="Nombre del club"
                 required
               />
             </div>
