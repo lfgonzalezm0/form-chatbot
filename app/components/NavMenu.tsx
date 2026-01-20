@@ -16,12 +16,12 @@ interface NavMenuItem {
 const menuItems: NavMenuItem[] = [
   {
     href: "/",
-    label: "Conversaciones",
-    description: "Gestionar conversaciones del chatbot",
-    modulo: "conversaciones",
+    label: "Preguntas",
+    description: "Gestionar preguntas pendientes",
+    modulo: "preguntas",
     icon: (
       <svg viewBox="0 0 24 24" fill="currentColor">
-        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+        <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
       </svg>
     ),
   },

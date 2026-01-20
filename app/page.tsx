@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import AppLayout from "./components/AppLayout";
+import AppLayoutPreguntas from "./components/AppLayoutPreguntas";
 
 export default function Page() {
-  return <AppLayout />;
+  return <AppLayoutPreguntas />;
 }

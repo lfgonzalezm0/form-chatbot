@@ -92,7 +92,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { categoria, necesidad, pregunta, respuesta, variante, imagenUrl, videoUrl, telefonocaso } = body;
+    const { categoria, necesidad, pregunta, respuesta, variante, imagenUrl, videoUrl, telefonocaso, habilitado } = body;
 
     // Actualizar con las URLs directamente
     // NOTA: variante NO usa COALESCE para permitir eliminar variantes (poner null o string vacío)
@@ -108,10 +108,11 @@ export async function PUT(
              variante = $6,
              urlimagen = $7,
              videourl = $8,
-             telefonocaso = $9
+             telefonocaso = $9,
+             habilitado = COALESCE($10, habilitado)
          WHERE id = $1
          RETURNING *`,
-        [id, categoria, necesidad, pregunta, respuesta, variante, imagenUrl !== undefined ? imagenUrl : null, videoUrl !== undefined ? videoUrl : null, telefonocaso]
+        [id, categoria, necesidad, pregunta, respuesta, variante, imagenUrl !== undefined ? imagenUrl : null, videoUrl !== undefined ? videoUrl : null, telefonocaso, habilitado]
       );
     } else {
       result = await pool.query(
@@ -122,10 +123,11 @@ export async function PUT(
              respuesta = COALESCE($5, respuesta),
              variante = $6,
              urlimagen = $7,
-             videourl = $8
+             videourl = $8,
+             habilitado = COALESCE($9, habilitado)
          WHERE id = $1
          RETURNING *`,
-        [id, categoria, necesidad, pregunta, respuesta, variante, imagenUrl !== undefined ? imagenUrl : null, videoUrl !== undefined ? videoUrl : null]
+        [id, categoria, necesidad, pregunta, respuesta, variante, imagenUrl !== undefined ? imagenUrl : null, videoUrl !== undefined ? videoUrl : null, habilitado]
       );
     }
 
