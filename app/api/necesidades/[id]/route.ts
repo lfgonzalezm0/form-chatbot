@@ -92,7 +92,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { categoria, necesidad, descripcion, habilitado, telefonocaso } = body;
+    const { categoria, necesidad, descripcion, habilitado, telefonocaso, controlhumano } = body;
 
     // Obtener la necesidad original para saber su nombre actual
     const necesidadOriginal = checkResult.rows[0];
@@ -106,10 +106,11 @@ export async function PUT(
              necesidad = COALESCE($3, necesidad),
              descripcion = $4,
              habilitado = COALESCE($5, habilitado),
-             telefonocaso = $6
+             telefonocaso = $6,
+             controlhumano = COALESCE($7, controlhumano)
          WHERE id = $1
          RETURNING *`,
-        [id, categoria, necesidad, descripcion ?? null, habilitado, telefonocaso]
+        [id, categoria, necesidad, descripcion ?? null, habilitado, telefonocaso, controlhumano]
       );
 
       // Actualizar automáticamente todas las preguntas asociadas a esta necesidad
@@ -128,10 +129,11 @@ export async function PUT(
          SET categoria = COALESCE($2, categoria),
              necesidad = COALESCE($3, necesidad),
              descripcion = $4,
-             habilitado = COALESCE($5, habilitado)
+             habilitado = COALESCE($5, habilitado),
+             controlhumano = COALESCE($6, controlhumano)
          WHERE id = $1
          RETURNING *`,
-        [id, categoria, necesidad, descripcion ?? null, habilitado]
+        [id, categoria, necesidad, descripcion ?? null, habilitado, controlhumano]
       );
     }
 

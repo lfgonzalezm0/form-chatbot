@@ -33,6 +33,7 @@ export async function GET() {
           n.necesidad,
           n.descripcion,
           n.habilitado,
+          n.controlhumano,
           c.nombre as cuenta_nombre
         FROM necesidadessystem n
         LEFT JOIN cuentassystem c ON n.telefonocaso = c.telefono
@@ -47,7 +48,8 @@ export async function GET() {
           categoria,
           necesidad,
           descripcion,
-          habilitado
+          habilitado,
+          controlhumano
         FROM necesidadessystem
         WHERE telefonocaso = $1
         ORDER BY categoria ASC, necesidad ASC
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest) {
 
     const session = JSON.parse(sessionCookie.value);
     const body = await req.json();
-    const { categoria, necesidad, descripcion, habilitado } = body;
+    const { categoria, necesidad, descripcion, habilitado, controlhumano } = body;
 
     if (!categoria || !necesidad) {
       return NextResponse.json(
@@ -95,10 +97,10 @@ export async function POST(req: NextRequest) {
     const telefonocaso = session.telefono;
 
     const result = await pool.query(
-      `INSERT INTO necesidadessystem (telefonocaso, categoria, necesidad, descripcion, habilitado)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO necesidadessystem (telefonocaso, categoria, necesidad, descripcion, habilitado, controlhumano)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [telefonocaso, categoria, necesidad, descripcion || null, habilitado ?? true]
+      [telefonocaso, categoria, necesidad, descripcion || null, habilitado ?? true, controlhumano ?? false]
     );
 
     return NextResponse.json(result.rows[0], { status: 201 });

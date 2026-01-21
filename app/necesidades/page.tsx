@@ -11,6 +11,7 @@ interface Necesidad {
   necesidad: string | null;
   descripcion: string | null;
   habilitado: boolean | null;
+  controlhumano: boolean | null;
   cuenta_nombre?: string | null;
 }
 
@@ -293,6 +294,34 @@ export default function NecesidadesPage() {
     } finally {
       setGuardando(false);
       setConfirmandoEliminar(null);
+    }
+  };
+
+  // Toggle control humano
+  const toggleControlHumano = async (necesidad: Necesidad) => {
+    try {
+      const nuevoValor = !necesidad.controlhumano;
+      const res = await fetch(`/api/necesidades/${necesidad.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ controlhumano: nuevoValor }),
+      });
+      if (!res.ok) throw new Error("Error al actualizar");
+
+      setNecesidades((prev) =>
+        prev.map((n) =>
+          n.id === necesidad.id ? { ...n, controlhumano: nuevoValor } : n
+        )
+      );
+
+      if (necesidadSeleccionada?.id === necesidad.id) {
+        setNecesidadSeleccionada({ ...necesidadSeleccionada, controlhumano: nuevoValor });
+      }
+
+      mostrarMensaje(nuevoValor ? "Control humano activado" : "Control humano desactivado");
+    } catch (err) {
+      console.error(err);
+      mostrarMensaje("Error al cambiar control humano");
     }
   };
 
@@ -684,6 +713,7 @@ export default function NecesidadesPage() {
                     <div className="necesidad-categoria">
                       <span className="badge-categoria">{n.categoria}</span>
                       {!n.habilitado && <span className="badge-deshabilitado">Deshabilitado</span>}
+                      {n.controlhumano && <span className="badge-control-humano">Operador</span>}
                       {esAdmin && n.cuenta_nombre && (
                         <span className="badge-cuenta" title={`Teléfono: ${n.telefonocaso}`}>
                           {n.cuenta_nombre}
@@ -692,6 +722,18 @@ export default function NecesidadesPage() {
                     </div>
                   </div>
                   <div className="necesidad-acciones">
+                    <button
+                      className={`btn-accion-mini control-humano ${n.controlhumano ? "activo" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleControlHumano(n);
+                      }}
+                      title={n.controlhumano ? "Desactivar control humano" : "Activar control humano"}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    </button>
                     <button
                       className="btn-accion-mini agregar"
                       onClick={(e) => {
