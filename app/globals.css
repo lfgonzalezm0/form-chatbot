@@ -3197,10 +3197,12 @@ body {
    PAGINA DE NECESIDADES Y PREGUNTAS
    ============================================ */
 .necesidades-page {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background-color: #e5ddd5;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .necesidades-loading {
@@ -3222,6 +3224,7 @@ body {
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .necesidades-header-left {
@@ -3286,6 +3289,7 @@ body {
   display: none;
   background-color: #128c7e;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .necesidades-tabs-movil .tab-btn {
@@ -3333,9 +3337,10 @@ body {
 
 /* Contenido principal */
 .necesidades-contenido {
-  flex: 1;
+  flex: 1 1 0;
   display: flex;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* Panel izquierdo - Necesidades */
@@ -3347,6 +3352,7 @@ body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 68px);
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -3356,6 +3362,7 @@ body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 68px);
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -3367,6 +3374,7 @@ body {
   padding: 16px 20px;
   background-color: #f0f2f5;
   border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .panel-header h2 {
@@ -3443,6 +3451,7 @@ body {
   padding: 12px 16px;
   background-color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .filtro-buscar {
@@ -3491,8 +3500,11 @@ body {
 
 /* Lista de necesidades */
 .lista-necesidades {
-  flex: 1;
+  flex: 1 1 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .lista-vacia,
@@ -3688,13 +3700,15 @@ body {
 
 /* Lista de preguntas */
 .lista-preguntas {
-  flex: 1;
+  flex: 1 1 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 0; /* Importante para que flex+overflow funcione correctamente */
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Card de pregunta */
@@ -3703,6 +3717,7 @@ body {
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .pregunta-header {
@@ -4553,17 +4568,23 @@ video.media-preview-full {
 
   .necesidades-contenido {
     position: relative;
+    flex: 1;
+    overflow: hidden;
   }
 
   .panel-necesidades,
   .panel-preguntas {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     min-width: 100%;
-    height: calc(100vh - 68px - 54px);
+    height: 100%;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    overflow: hidden;
   }
 
   .panel-necesidades.activo,
@@ -4577,6 +4598,13 @@ video.media-preview-full {
 
   .btn-volver-movil {
     display: flex;
+  }
+
+  .lista-preguntas {
+    height: auto;
+    max-height: none;
+    flex: 1 1 0;
+    min-height: 0;
   }
 }
 
