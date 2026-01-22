@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "cloudinary": "^2.9.0",
     "next": "16.1.2",
     "pg": "^8.17.1",
     "react": "19.2.3",

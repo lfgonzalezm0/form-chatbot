@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
 import { cookies } from "next/headers";
 
-// URL base de la aplicacion
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://form-chatbot-production.up.railway.app";
-
-// Directorio de uploads
-const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+// Configurar Cloudinary usando CLOUDINARY_URL
+// La variable CLOUDINARY_URL configura automáticamente cloud_name, api_key y api_secret
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,42 +41,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validar tamaño (5MB para imagenes, 50MB para videos)
-    const maxSize = esImagen ? 5 * 1024 * 1024 : 50 * 1024 * 1024;
+    // Validar tamaño (10MB para imagenes, 100MB para videos - Cloudinary permite más)
+    const maxSize = esImagen ? 10 * 1024 * 1024 : 100 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: `El archivo no debe superar ${esImagen ? "5MB" : "50MB"}` },
+        { error: `El archivo no debe superar ${esImagen ? "10MB" : "100MB"}` },
         { status: 400 }
       );
     }
 
-    // Crear directorio si no existe
-    if (!existsSync(UPLOADS_DIR)) {
-      await mkdir(UPLOADS_DIR, { recursive: true });
-    }
-
-    // Generar nombre unico para el archivo
-    const timestamp = Date.now();
-    const extension = file.name.split(".").pop() || (esImagen ? "jpg" : "mp4");
-    const nombreArchivo = `${tipo || (esImagen ? "imagen" : "video")}_${timestamp}.${extension}`;
-    const rutaArchivo = path.join(UPLOADS_DIR, nombreArchivo);
-
-    // Guardar archivo
+    // Convertir archivo a base64 para subirlo a Cloudinary
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(rutaArchivo, buffer);
+    const base64 = buffer.toString("base64");
+    const dataUri = `data:${file.type};base64,${base64}`;
 
-    // Generar URL publica
-    const url = `${APP_URL}/api/uploads/${nombreArchivo}`;
+    // Generar nombre único
+    const timestamp = Date.now();
+    const publicId = `${tipo || (esImagen ? "imagen" : "video")}_${timestamp}`;
+
+    // Subir a Cloudinary
+    const result = await cloudinary.uploader.upload(dataUri, {
+      public_id: publicId,
+      resource_type: esVideo ? "video" : "image",
+      folder: "form-chatbot",
+    });
 
     return NextResponse.json({
       success: true,
-      filename: nombreArchivo,
-      url,
+      filename: result.public_id,
+      url: result.secure_url,
       tipo: esImagen ? "imagen" : "video",
     });
   } catch (error) {
-    console.error("Error al subir archivo:", error);
+    console.error("Error al subir archivo a Cloudinary:", error);
     return NextResponse.json(
       { error: "Error al subir archivo" },
       { status: 500 }
