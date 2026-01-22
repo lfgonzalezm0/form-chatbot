@@ -22,6 +22,10 @@ export default function AppLayoutPreguntas() {
     setIdSeleccionado(null);
   }, []);
 
+  const handlePreguntaEliminada = useCallback(() => {
+    setIdSeleccionado(null);
+  }, []);
+
   // Mostrar carga mientras se verifica la sesión
   if (cargando) {
     return (
@@ -55,6 +59,7 @@ export default function AppLayoutPreguntas() {
             onSeleccionPregunta={handleSeleccionPregunta}
             onClose={() => setSidebarOpen(false)}
             refreshKey={refreshKey}
+            onPreguntaEliminada={handlePreguntaEliminada}
           />
         </Suspense>
       </div>

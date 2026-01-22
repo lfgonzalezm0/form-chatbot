@@ -9,6 +9,7 @@ interface SidebarPreguntasProps {
   onSeleccionPregunta: (id: number) => void;
   onClose?: () => void;
   refreshKey?: number;
+  onPreguntaEliminada?: () => void;
 }
 
 interface PreguntaPendiente {
@@ -48,12 +49,15 @@ export default function SidebarPreguntas({
   onSeleccionPregunta,
   onClose,
   refreshKey,
+  onPreguntaEliminada,
 }: SidebarPreguntasProps) {
   const { usuario, cerrarSesion } = useAuth();
   const [preguntas, setPreguntas] = useState<PreguntaPendiente[]>([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("");
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState<number | null>(null);
+  const [eliminando, setEliminando] = useState(false);
 
   // Categorías únicas
   const [categorias, setCategorias] = useState<string[]>([]);
@@ -109,6 +113,28 @@ export default function SidebarPreguntas({
 
   const handlePreguntaClick = (id: number) => {
     onSeleccionPregunta(id);
+  };
+
+  const handleEliminarPregunta = async (id: number) => {
+    setEliminando(true);
+    try {
+      const res = await fetch(`/api/preguntas/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Error al eliminar");
+
+      // Remover de la lista local
+      setPreguntas((prev) => prev.filter((p) => p.id !== id));
+      setConfirmandoEliminar(null);
+
+      // Notificar al padre si la pregunta eliminada era la seleccionada
+      if (idSeleccionado === id && onPreguntaEliminada) {
+        onPreguntaEliminada();
+      }
+    } catch (error) {
+      console.error("Error al eliminar pregunta:", error);
+      alert("Error al eliminar la pregunta");
+    } finally {
+      setEliminando(false);
+    }
   };
 
   return (
@@ -242,10 +268,55 @@ export default function SidebarPreguntas({
                   </span>
                 </div>
               </div>
+
+              {/* Botón eliminar */}
+              <button
+                className="conv-btn-eliminar"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmandoEliminar(pregunta.id);
+                }}
+                title="Eliminar pregunta"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                </svg>
+              </button>
             </div>
           ))
         )}
       </div>
+
+      {/* Modal de confirmación de eliminar */}
+      {confirmandoEliminar && (
+        <div className="modal-overlay-sidebar" onClick={() => setConfirmandoEliminar(null)}>
+          <div className="modal-confirmar-eliminar" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-confirmar-header">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+              </svg>
+              <h3>Eliminar pregunta</h3>
+            </div>
+            <p>¿Está seguro de eliminar esta pregunta? Esta acción no se puede deshacer.</p>
+            <div className="modal-confirmar-acciones">
+              <button
+                className="btn-cancelar-modal"
+                onClick={() => setConfirmandoEliminar(null)}
+                disabled={eliminando}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn-eliminar-modal"
+                onClick={() => handleEliminarPregunta(confirmandoEliminar)}
+                disabled={eliminando}
+              >
+                {eliminando ? "Eliminando..." : "Eliminar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

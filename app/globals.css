@@ -572,6 +572,133 @@ body {
   color: #25d366;
 }
 
+/* Botón eliminar en item de conversación */
+.conv-btn-eliminar {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.conversacion-item {
+  position: relative;
+}
+
+.conversacion-item:hover .conv-btn-eliminar {
+  opacity: 1;
+}
+
+.conv-btn-eliminar:hover {
+  background-color: #ffebee;
+}
+
+.conv-btn-eliminar svg {
+  width: 18px;
+  height: 18px;
+  color: #e53935;
+}
+
+/* Modal de confirmación en sidebar */
+.modal-overlay-sidebar {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-confirmar-eliminar {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-confirmar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-confirmar-header svg {
+  width: 28px;
+  height: 28px;
+  color: #e53935;
+}
+
+.modal-confirmar-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-confirmar-eliminar p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.modal-confirmar-acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-cancelar-modal {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: background-color 0.2s;
+}
+
+.btn-cancelar-modal:hover {
+  background-color: #f5f5f5;
+}
+
+.btn-eliminar-modal {
+  padding: 10px 20px;
+  border: none;
+  background: #e53935;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-eliminar-modal:hover {
+  background-color: #c62828;
+}
+
+.btn-eliminar-modal:disabled,
+.btn-cancelar-modal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ============================================
    MAIN CONTENT - Contenido principal
    ============================================ */
