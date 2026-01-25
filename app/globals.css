@@ -1633,6 +1633,56 @@ body {
   font-weight: 500;
 }
 
+.badge-necesidad {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: var(--card-blue);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+.badge-media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  margin-right: 4px;
+}
+
+.badge-media svg {
+  width: 16px;
+  height: 16px;
+}
+
+.badge-media.badge-imagen {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--card-blue);
+}
+
+.badge-media.badge-video {
+  background: rgba(168, 85, 247, 0.15);
+  color: var(--card-purple);
+}
+
+[data-theme="dark"] .badge-media.badge-imagen {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="dark"] .badge-media.badge-video {
+  background: rgba(168, 85, 247, 0.25);
+}
+
+.celda-medios {
+  white-space: nowrap;
+}
+
+.filtro-grupo-buscar {
+  flex: 2;
+}
+
 .badge-deshabilitado {
   font-size: 11px;
   padding: 3px 8px;

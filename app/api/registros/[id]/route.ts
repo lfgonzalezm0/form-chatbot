@@ -38,7 +38,7 @@ export async function DELETE(
 
     // Verificar que el registro exista
     const existe = await pool.query(
-      `SELECT id FROM consultanecesidad WHERE id = $1`,
+      `SELECT id FROM preguntassystem WHERE id = $1`,
       [id]
     );
 
@@ -50,7 +50,7 @@ export async function DELETE(
     }
 
     // Eliminar el registro
-    await pool.query(`DELETE FROM consultanecesidad WHERE id = $1`, [id]);
+    await pool.query(`DELETE FROM preguntassystem WHERE id = $1`, [id]);
 
     return NextResponse.json({ success: true, message: "Registro eliminado" });
   } catch (error) {

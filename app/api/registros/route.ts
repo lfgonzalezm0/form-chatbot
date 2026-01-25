@@ -20,35 +20,46 @@ export async function GET() {
     const session = JSON.parse(sessionCookie.value);
     const esAdmin = session.tipousuario === "Administrador";
 
-    let query = `
-      SELECT
-        id,
-        guid,
-        telefonocliente,
-        telefonoempresa,
-        contexto,
-        pregunta,
-        respuesta,
-        creado,
-        enlace,
-        estado,
-        accionadmin,
-        paso,
-        bloqueado,
-        urlimagen,
-        videourl
-      FROM consultanecesidad
-    `;
-
+    let query: string;
     const params: string[] = [];
 
-    // Si no es admin, filtrar por telefonoempresa del usuario
-    if (!esAdmin && session.telefono) {
-      query += ` WHERE telefonoempresa = $1`;
+    if (esAdmin) {
+      // Admin ve todas las preguntas con info de la cuenta
+      query = `
+        SELECT
+          p.id,
+          p.telefonocaso,
+          p.categoria,
+          p.necesidad,
+          p.pregunta,
+          p.respuesta,
+          p.variante,
+          p.urlimagen,
+          p.videourl,
+          c.nombre as cuenta_nombre
+        FROM preguntassystem p
+        LEFT JOIN cuentassystem c ON p.telefonocaso = c.telefono
+        ORDER BY p.id DESC
+      `;
+    } else {
+      // Usuario normal solo ve sus preguntas
+      query = `
+        SELECT
+          id,
+          telefonocaso,
+          categoria,
+          necesidad,
+          pregunta,
+          respuesta,
+          variante,
+          urlimagen,
+          videourl
+        FROM preguntassystem
+        WHERE telefonocaso = $1
+        ORDER BY id DESC
+      `;
       params.push(session.telefono);
     }
-
-    query += ` ORDER BY creado DESC`;
 
     const result = await pool.query(query, params);
 
