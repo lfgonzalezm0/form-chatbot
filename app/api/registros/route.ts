@@ -18,26 +18,50 @@ export async function GET() {
     }
 
     const session = JSON.parse(sessionCookie.value);
+    const esAdmin = session.tipousuario === "Administrador";
 
-    // Todos los usuarios solo ven sus propios registros (filtrado por telefono)
-    const query = `
-      SELECT
-        id,
-        telefonocaso,
-        categoria,
-        necesidad,
-        pregunta,
-        respuesta,
-        variante,
-        urlimagen,
-        videourl,
-        creado
-      FROM preguntassystem
-      WHERE telefonocaso = $1
-      ORDER BY creado DESC, id DESC
-    `;
+    let query: string;
+    const params: string[] = [];
 
-    const result = await pool.query(query, [session.telefono]);
+    if (esAdmin) {
+      // Admin ve todos los registros
+      query = `
+        SELECT
+          id,
+          telefonocaso,
+          categoria,
+          necesidad,
+          pregunta,
+          respuesta,
+          variante,
+          urlimagen,
+          videourl,
+          creado
+        FROM preguntassystem
+        ORDER BY creado DESC, id DESC
+      `;
+    } else {
+      // Usuario normal solo ve sus propios registros
+      query = `
+        SELECT
+          id,
+          telefonocaso,
+          categoria,
+          necesidad,
+          pregunta,
+          respuesta,
+          variante,
+          urlimagen,
+          videourl,
+          creado
+        FROM preguntassystem
+        WHERE telefonocaso = $1
+        ORDER BY creado DESC, id DESC
+      `;
+      params.push(session.telefono);
+    }
+
+    const result = await pool.query(query, params);
 
     return NextResponse.json(result.rows);
   } catch (error) {
