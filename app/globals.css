@@ -1683,6 +1683,26 @@ body {
   flex: 2;
 }
 
+.celda-fecha {
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.celda-necesidad {
+  min-width: 180px;
+  max-width: 250px;
+}
+
+.texto-necesidad {
+  display: block;
+  font-size: 13px;
+  color: var(--text-primary);
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
+
 .badge-deshabilitado {
   font-size: 11px;
   padding: 3px 8px;

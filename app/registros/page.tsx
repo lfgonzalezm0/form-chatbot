@@ -13,7 +13,19 @@ interface Registro {
   variante: string | null;
   urlimagen: string | null;
   videourl: string | null;
-  cuenta_nombre?: string | null;
+  creado: string | null;
+}
+
+function formatearFecha(fecha: string | null): string {
+  if (!fecha) return "-";
+  const date = new Date(fecha);
+  return date.toLocaleString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function truncarTexto(texto: string | null, maxLength: number): string {
@@ -32,6 +44,8 @@ export default function RegistrosPage() {
   const [filtroTexto, setFiltroTexto] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todos");
   const [filtroNecesidad, setFiltroNecesidad] = useState<string>("todos");
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
 
   // Registro expandido para ver detalles
   const [registroExpandido, setRegistroExpandido] = useState<number | null>(null);
@@ -49,7 +63,7 @@ export default function RegistrosPage() {
 
   useEffect(() => {
     aplicarFiltros();
-  }, [registros, filtroTexto, filtroCategoria, filtroNecesidad]);
+  }, [registros, filtroTexto, filtroCategoria, filtroNecesidad, filtroFechaDesde, filtroFechaHasta]);
 
   const fetchRegistros = async () => {
     try {
@@ -79,8 +93,7 @@ export default function RegistrosPage() {
           r.necesidad?.toLowerCase().includes(texto) ||
           r.pregunta?.toLowerCase().includes(texto) ||
           r.respuesta?.toLowerCase().includes(texto) ||
-          r.variante?.toLowerCase().includes(texto) ||
-          r.cuenta_nombre?.toLowerCase().includes(texto)
+          r.variante?.toLowerCase().includes(texto)
       );
     }
 
@@ -94,6 +107,18 @@ export default function RegistrosPage() {
       resultado = resultado.filter((r) => r.necesidad === filtroNecesidad);
     }
 
+    // Filtro por fecha desde
+    if (filtroFechaDesde) {
+      const desde = new Date(filtroFechaDesde);
+      resultado = resultado.filter((r) => r.creado && new Date(r.creado) >= desde);
+    }
+
+    // Filtro por fecha hasta
+    if (filtroFechaHasta) {
+      const hasta = new Date(filtroFechaHasta + "T23:59:59");
+      resultado = resultado.filter((r) => r.creado && new Date(r.creado) <= hasta);
+    }
+
     setRegistrosFiltrados(resultado);
   };
 
@@ -101,6 +126,8 @@ export default function RegistrosPage() {
     setFiltroTexto("");
     setFiltroCategoria("todos");
     setFiltroNecesidad("todos");
+    setFiltroFechaDesde("");
+    setFiltroFechaHasta("");
   };
 
   const eliminarRegistro = async () => {
@@ -185,7 +212,7 @@ export default function RegistrosPage() {
             <label>Buscar</label>
             <input
               type="text"
-              placeholder="Telefono, categoria, necesidad, pregunta..."
+              placeholder="Categoria, necesidad, pregunta..."
               value={filtroTexto}
               onChange={(e) => setFiltroTexto(e.target.value)}
             />
@@ -214,6 +241,26 @@ export default function RegistrosPage() {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="filtros-row">
+          <div className="filtro-grupo">
+            <label>Fecha desde</label>
+            <input
+              type="date"
+              value={filtroFechaDesde}
+              onChange={(e) => setFiltroFechaDesde(e.target.value)}
+            />
+          </div>
+
+          <div className="filtro-grupo">
+            <label>Fecha hasta</label>
+            <input
+              type="date"
+              value={filtroFechaHasta}
+              onChange={(e) => setFiltroFechaHasta(e.target.value)}
+            />
+          </div>
 
           <div className="filtro-grupo filtro-acciones">
             <button className="btn-limpiar" onClick={limpiarFiltros}>
@@ -229,8 +276,7 @@ export default function RegistrosPage() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Telefono</th>
-              <th>Cuenta</th>
+              <th>Creado</th>
               <th>Categoria</th>
               <th>Necesidad</th>
               <th>Pregunta</th>
@@ -243,7 +289,7 @@ export default function RegistrosPage() {
           <tbody>
             {registrosFiltrados.length === 0 ? (
               <tr>
-                <td colSpan={10} className="tabla-vacia">
+                <td colSpan={9} className="tabla-vacia">
                   No se encontraron registros
                 </td>
               </tr>
@@ -252,15 +298,14 @@ export default function RegistrosPage() {
                 <>
                   <tr key={registro.id}>
                     <td>{registro.id}</td>
-                    <td>{registro.telefonocaso || "-"}</td>
-                    <td>{registro.cuenta_nombre || "-"}</td>
+                    <td className="celda-fecha">{formatearFecha(registro.creado)}</td>
                     <td>
                       <span className="badge-categoria">
                         {registro.categoria || "-"}
                       </span>
                     </td>
-                    <td>
-                      <span className="badge-necesidad">
+                    <td className="celda-necesidad">
+                      <span className="texto-necesidad" title={registro.necesidad || ""}>
                         {registro.necesidad || "-"}
                       </span>
                     </td>
@@ -313,16 +358,16 @@ export default function RegistrosPage() {
                   </tr>
                   {registroExpandido === registro.id && (
                     <tr className="fila-detalle">
-                      <td colSpan={10}>
+                      <td colSpan={9}>
                         <div className="detalle-contenido">
                           <div className="detalle-grid">
                             <div className="detalle-campo">
-                              <strong>Telefono:</strong>
-                              <span>{registro.telefonocaso || "-"}</span>
+                              <strong>ID:</strong>
+                              <span>{registro.id}</span>
                             </div>
                             <div className="detalle-campo">
-                              <strong>Cuenta:</strong>
-                              <span>{registro.cuenta_nombre || "-"}</span>
+                              <strong>Creado:</strong>
+                              <span>{formatearFecha(registro.creado)}</span>
                             </div>
                             <div className="detalle-campo">
                               <strong>Categoria:</strong>
