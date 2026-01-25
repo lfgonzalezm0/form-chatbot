@@ -3,10 +3,8 @@
 import { Suspense, useState, useCallback } from "react";
 import SidebarPreguntas from "./SidebarPreguntas";
 import PreguntaDetalle from "./PreguntaDetalle";
-import { useAuth } from "./AuthProvider";
 
-export default function AppLayoutPreguntas() {
-  const { usuario, cargando } = useAuth();
+export default function PreguntasModule() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [idSeleccionado, setIdSeleccionado] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -25,21 +23,9 @@ export default function AppLayoutPreguntas() {
     setIdSeleccionado(null);
   }, []);
 
-  if (cargando) {
-    return (
-      <div className="app-loading">
-        <div className="loading-spinner"></div>
-        <p>Cargando...</p>
-      </div>
-    );
-  }
-
-  if (!usuario) {
-    return null;
-  }
-
   return (
     <div className="module-container">
+      {/* Overlay para cerrar sidebar en movil */}
       {sidebarOpen && (
         <div
           className="sidebar-overlay"
@@ -47,6 +33,7 @@ export default function AppLayoutPreguntas() {
         />
       )}
 
+      {/* Sidebar */}
       <div className={`module-sidebar ${sidebarOpen ? "open" : ""}`}>
         <Suspense fallback={<div className="sidebar-loading">Cargando...</div>}>
           <SidebarPreguntas
@@ -59,6 +46,7 @@ export default function AppLayoutPreguntas() {
         </Suspense>
       </div>
 
+      {/* Boton hamburguesa para movil */}
       <button
         className="mobile-menu-btn"
         onClick={() => setSidebarOpen(true)}

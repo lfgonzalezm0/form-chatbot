@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useAuth } from "../components/AuthProvider";
 
 interface Necesidad {
@@ -601,11 +600,6 @@ export default function NecesidadesPage() {
       {/* Header */}
       <div className="necesidades-header">
         <div className="necesidades-header-left">
-          <Link href="/" className="necesidades-back-btn">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
-            </svg>
-          </Link>
           <h1>Necesidades y Preguntas</h1>
         </div>
         <div className="necesidades-header-right">
