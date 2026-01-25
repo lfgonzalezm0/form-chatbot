@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,12 +48,23 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
+      {/* Decoración de fondo */}
+      <div className="login-bg-decoration">
+        <div className="login-bg-circle login-bg-circle-1"></div>
+        <div className="login-bg-circle login-bg-circle-2"></div>
+        <div className="login-bg-circle login-bg-circle-3"></div>
+      </div>
+
       <div className="login-card">
         <div className="login-header">
-          <div className="login-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
-            </svg>
+          <div className="login-logo">
+            <Image
+              src="/LogoCC.png"
+              alt="Logo"
+              width={120}
+              height={120}
+              priority
+            />
           </div>
           <h1>Gestión de ChatBot</h1>
           <p>Inicie sesión para continuar</p>
@@ -70,28 +82,38 @@ export default function LoginPage() {
 
           <div className="login-field">
             <label htmlFor="usuario">Usuario</label>
-            <input
-              type="text"
-              id="usuario"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-              placeholder="Ingrese su usuario"
-              required
-              disabled={cargando}
-            />
+            <div className="login-input-wrapper">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              <input
+                type="text"
+                id="usuario"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                placeholder="Ingrese su usuario"
+                required
+                disabled={cargando}
+              />
+            </div>
           </div>
 
           <div className="login-field">
             <label htmlFor="contrasena">Contraseña</label>
-            <input
-              type="password"
-              id="contrasena"
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              placeholder="Ingrese su contraseña"
-              required
-              disabled={cargando}
-            />
+            <div className="login-input-wrapper">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+              </svg>
+              <input
+                type="password"
+                id="contrasena"
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+                placeholder="Ingrese su contraseña"
+                required
+                disabled={cargando}
+              />
+            </div>
           </div>
 
           <button type="submit" className="login-btn" disabled={cargando}>
@@ -102,10 +124,10 @@ export default function LoginPage() {
               </>
             ) : (
               <>
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
-                </svg>
                 Iniciar sesión
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
               </>
             )}
           </button>
