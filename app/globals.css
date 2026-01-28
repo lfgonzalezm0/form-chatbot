@@ -1487,6 +1487,43 @@ body {
   height: 18px;
 }
 
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-exportar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-exportar:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+}
+
+.btn-exportar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-exportar svg {
+  width: 16px;
+  height: 16px;
+}
+
 .panel-filtros {
   display: flex;
   gap: 12px;

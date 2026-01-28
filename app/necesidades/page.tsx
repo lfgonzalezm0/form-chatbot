@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../components/AuthProvider";
+import * as XLSX from "xlsx";
 
 interface Necesidad {
   id: number;
@@ -581,6 +582,79 @@ export default function NecesidadesPage() {
     setVistaMovil("preguntas");
   };
 
+  // Exportar necesidades a Excel
+  const exportarNecesidades = () => {
+    const datosExportar = necesidadesFiltradas.map((n) => ({
+      ID: n.id,
+      Categoria: n.categoria || "",
+      Necesidad: n.necesidad || "",
+      Descripcion: n.descripcion || "",
+      Habilitado: n.habilitado ? "Sí" : "No",
+      "Control Humano": n.controlhumano ? "Sí" : "No",
+      ...(esAdmin && { Cuenta: n.cuenta_nombre || "", Telefono: n.telefonocaso || "" }),
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(datosExportar);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Necesidades");
+
+    // Ajustar ancho de columnas
+    const colWidths = [
+      { wch: 6 },  // ID
+      { wch: 15 }, // Categoria
+      { wch: 30 }, // Necesidad
+      { wch: 50 }, // Descripcion
+      { wch: 10 }, // Habilitado
+      { wch: 15 }, // Control Humano
+      ...(esAdmin ? [{ wch: 20 }, { wch: 15 }] : []), // Cuenta, Telefono
+    ];
+    ws["!cols"] = colWidths;
+
+    const fecha = new Date().toISOString().split("T")[0];
+    XLSX.writeFile(wb, `necesidades_${fecha}.xlsx`);
+    mostrarMensaje("Necesidades exportadas correctamente");
+  };
+
+  // Exportar preguntas a Excel
+  const exportarPreguntas = () => {
+    if (!necesidadSeleccionada) return;
+
+    const datosExportar = preguntasFiltradas.map((p) => ({
+      ID: p.id,
+      Categoria: p.categoria || "",
+      Necesidad: p.necesidad || "",
+      Pregunta: p.pregunta || "",
+      Respuesta: p.respuesta || "",
+      Variantes: p.variante?.replace(/;/g, ", ") || "",
+      "URL Imagen": p.urlimagen || "",
+      "URL Video": p.videourl || "",
+      ...(esAdmin && { Cuenta: p.cuenta_nombre || "", Telefono: p.telefonocaso || "" }),
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(datosExportar);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Preguntas");
+
+    // Ajustar ancho de columnas
+    const colWidths = [
+      { wch: 6 },  // ID
+      { wch: 15 }, // Categoria
+      { wch: 25 }, // Necesidad
+      { wch: 40 }, // Pregunta
+      { wch: 50 }, // Respuesta
+      { wch: 30 }, // Variantes
+      { wch: 40 }, // URL Imagen
+      { wch: 40 }, // URL Video
+      ...(esAdmin ? [{ wch: 20 }, { wch: 15 }] : []), // Cuenta, Telefono
+    ];
+    ws["!cols"] = colWidths;
+
+    const nombreNecesidad = necesidadSeleccionada.necesidad?.replace(/[^a-zA-Z0-9]/g, "_") || "preguntas";
+    const fecha = new Date().toISOString().split("T")[0];
+    XLSX.writeFile(wb, `preguntas_${nombreNecesidad}_${fecha}.xlsx`);
+    mostrarMensaje("Preguntas exportadas correctamente");
+  };
+
   if (cargandoNecesidades) {
     return (
       <div className="necesidades-page">
@@ -644,12 +718,25 @@ export default function NecesidadesPage() {
         <div className={`panel-necesidades ${vistaMovil === "necesidades" ? "activo" : ""}`}>
           <div className="panel-header">
             <h2>Necesidades</h2>
-            <button className="btn-crear-verde" onClick={abrirModalCrearNecesidad}>
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-              </svg>
-              Nueva
-            </button>
+            <div className="panel-header-actions">
+              <button
+                className="btn-exportar"
+                onClick={exportarNecesidades}
+                disabled={necesidadesFiltradas.length === 0}
+                title="Exportar a Excel"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                </svg>
+                Excel
+              </button>
+              <button className="btn-crear-verde" onClick={abrirModalCrearNecesidad}>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+                Nueva
+              </button>
+            </div>
           </div>
 
           {/* Filtros necesidades */}
@@ -789,12 +876,25 @@ export default function NecesidadesPage() {
                     </span>
                   </div>
                 </div>
-                <button className="btn-crear-verde" onClick={() => abrirModalCrearPregunta()}>
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                  </svg>
-                  Nueva Pregunta
-                </button>
+                <div className="panel-header-actions">
+                  <button
+                    className="btn-exportar"
+                    onClick={exportarPreguntas}
+                    disabled={preguntasFiltradas.length === 0}
+                    title="Exportar a Excel"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                    </svg>
+                    Excel
+                  </button>
+                  <button className="btn-crear-verde" onClick={() => abrirModalCrearPregunta()}>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                    Nueva Pregunta
+                  </button>
+                </div>
               </div>
 
               {/* Filtros preguntas */}
