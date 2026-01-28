@@ -655,6 +655,83 @@ export default function NecesidadesPage() {
     mostrarMensaje("Preguntas exportadas correctamente");
   };
 
+  // Exportar todo (necesidades + preguntas) a Excel
+  const [exportandoTodo, setExportandoTodo] = useState(false);
+
+  const exportarTodo = async () => {
+    if (necesidadesFiltradas.length === 0) return;
+
+    setExportandoTodo(true);
+    try {
+      // Obtener todas las preguntas de todas las necesidades
+      const todasLasPreguntas: Pregunta[] = [];
+
+      for (const nec of necesidadesFiltradas) {
+        if (nec.necesidad) {
+          const res = await fetch(`/api/preguntas?necesidad=${encodeURIComponent(nec.necesidad)}`);
+          if (res.ok) {
+            const preguntasNec = await res.json();
+            todasLasPreguntas.push(...preguntasNec);
+          }
+        }
+      }
+
+      // Crear datos combinados ordenados por necesidad
+      const datosExportar = todasLasPreguntas.map((p) => {
+        const necesidadInfo = necesidadesFiltradas.find((n) => n.necesidad === p.necesidad);
+        return {
+          // Datos de la necesidad
+          "Categoría Necesidad": necesidadInfo?.categoria || p.categoria || "",
+          Necesidad: p.necesidad || "",
+          "Descripción Necesidad": necesidadInfo?.descripcion || "",
+          Habilitado: necesidadInfo?.habilitado ? "Sí" : "No",
+          "Control Humano": necesidadInfo?.controlhumano ? "Sí" : "No",
+          // Datos de la pregunta
+          "ID Pregunta": p.id,
+          Pregunta: p.pregunta || "",
+          Respuesta: p.respuesta || "",
+          Variantes: p.variante?.replace(/;/g, ", ") || "",
+          "URL Imagen": p.urlimagen || "",
+          "URL Video": p.videourl || "",
+          ...(esAdmin && { Cuenta: p.cuenta_nombre || "", Telefono: p.telefonocaso || "" }),
+        };
+      });
+
+      // Ordenar por necesidad para agrupar
+      datosExportar.sort((a, b) => (a.Necesidad || "").localeCompare(b.Necesidad || ""));
+
+      const ws = XLSX.utils.json_to_sheet(datosExportar);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Necesidades y Preguntas");
+
+      // Ajustar ancho de columnas
+      const colWidths = [
+        { wch: 18 }, // Categoría Necesidad
+        { wch: 25 }, // Necesidad
+        { wch: 35 }, // Descripción Necesidad
+        { wch: 10 }, // Habilitado
+        { wch: 15 }, // Control Humano
+        { wch: 10 }, // ID Pregunta
+        { wch: 40 }, // Pregunta
+        { wch: 50 }, // Respuesta
+        { wch: 30 }, // Variantes
+        { wch: 35 }, // URL Imagen
+        { wch: 35 }, // URL Video
+        ...(esAdmin ? [{ wch: 20 }, { wch: 15 }] : []), // Cuenta, Telefono
+      ];
+      ws["!cols"] = colWidths;
+
+      const fecha = new Date().toISOString().split("T")[0];
+      XLSX.writeFile(wb, `necesidades_preguntas_completo_${fecha}.xlsx`);
+      mostrarMensaje(`Exportación completa: ${todasLasPreguntas.length} preguntas de ${necesidadesFiltradas.length} necesidades`);
+    } catch (err) {
+      console.error(err);
+      mostrarMensaje("Error al exportar datos");
+    } finally {
+      setExportandoTodo(false);
+    }
+  };
+
   if (cargandoNecesidades) {
     return (
       <div className="necesidades-page">
@@ -680,6 +757,21 @@ export default function NecesidadesPage() {
           <span className="necesidades-count">
             {necesidades.length} necesidades
           </span>
+          <button
+            className="btn-exportar-todo"
+            onClick={exportarTodo}
+            disabled={necesidadesFiltradas.length === 0 || exportandoTodo}
+            title="Exportar todas las necesidades con sus preguntas"
+          >
+            {exportandoTodo ? (
+              <span className="btn-spinner-small"></span>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+              </svg>
+            )}
+            {exportandoTodo ? "Exportando..." : "Exportar Todo"}
+          </button>
           <button className="refresh-btn" onClick={fetchNecesidades} title="Actualizar">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
