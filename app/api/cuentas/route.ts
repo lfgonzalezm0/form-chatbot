@@ -37,7 +37,13 @@ export async function GET() {
        ORDER BY nombre ASC`
     );
 
-    return NextResponse.json(result.rows);
+    // Parsear modulos de string a array
+    const cuentas = result.rows.map(cuenta => ({
+      ...cuenta,
+      modulos: cuenta.modulos ? (typeof cuenta.modulos === 'string' ? JSON.parse(cuenta.modulos) : cuenta.modulos) : []
+    }));
+
+    return NextResponse.json(cuentas);
   } catch (error) {
     console.error("Error al obtener cuentas:", error);
     return NextResponse.json(
@@ -122,7 +128,13 @@ export async function POST(request: Request) {
       [nombre || null, tipousuario, usuario, contrasena, correoNormalizado, telefonoNormalizado, estado || "activo", modulos ? JSON.stringify(modulos) : null]
     );
 
-    return NextResponse.json(result.rows[0], { status: 201 });
+    // Parsear modulos de string a array
+    const cuenta = {
+      ...result.rows[0],
+      modulos: result.rows[0].modulos ? (typeof result.rows[0].modulos === 'string' ? JSON.parse(result.rows[0].modulos) : result.rows[0].modulos) : []
+    };
+
+    return NextResponse.json(cuenta, { status: 201 });
   } catch (error) {
     console.error("Error al crear cuenta:", error);
     return NextResponse.json(

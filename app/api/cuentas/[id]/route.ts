@@ -50,7 +50,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(result.rows[0]);
+    // Parsear modulos de string a array
+    const cuenta = {
+      ...result.rows[0],
+      modulos: result.rows[0].modulos ? (typeof result.rows[0].modulos === 'string' ? JSON.parse(result.rows[0].modulos) : result.rows[0].modulos) : []
+    };
+
+    return NextResponse.json(cuenta);
   } catch (error) {
     console.error("Error al obtener cuenta:", error);
     return NextResponse.json(
@@ -195,7 +201,13 @@ export async function PUT(
       values
     );
 
-    return NextResponse.json(result.rows[0]);
+    // Parsear modulos de string a array
+    const cuenta = {
+      ...result.rows[0],
+      modulos: result.rows[0].modulos ? (typeof result.rows[0].modulos === 'string' ? JSON.parse(result.rows[0].modulos) : result.rows[0].modulos) : []
+    };
+
+    return NextResponse.json(cuenta);
   } catch (error) {
     console.error("Error al actualizar cuenta:", error);
     return NextResponse.json(
